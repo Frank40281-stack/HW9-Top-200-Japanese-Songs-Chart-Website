@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日語熱門歌曲排行榜 - Top 200 Most Liked</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* CSS resets & custom scrollbar */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0e12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2c3a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7c4dff;
+        }
+        
+        :root {
+            --bg-primary: #0a0b10;
+            --bg-secondary: #12131a;
+            --bg-glass: rgba(18, 19, 26, 0.75);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(124, 77, 255, 0.5);
+            --accent: #7c4dff;
+            --accent-glow: rgba(124, 77, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a9abb6;
+            --text-muted: #646672;
+            --card-hover: rgba(255, 255, 255, 0.02);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(rgba(10, 11, 16, 0.5), rgba(10, 11, 16, 0.85)), url('sakura_forest.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 60px;
+        }
+
+        /* Ambient Glow Blobs */
+        .ambient-glow {
+            position: absolute;
+            width: 45vw;
+            height: 45vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .glow-1 {
+            background: radial-gradient(circle, #7c4dff 0%, transparent 70%);
+            top: -10vw;
+            left: -10vw;
+        }
+        .glow-2 {
+            background: radial-gradient(circle, #00e5ff 0%, transparent 70%);
+            bottom: 10vw;
+            right: -10vw;
+        }
+
+        /* Sakura Falling Canvas */
+        #sakura-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+        .logo-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px var(--accent-glow)); }
+            100% { transform: scale(1.05); filter: drop-shadow(0 0 10px var(--accent)); }
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 50%, #a9abb6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+        .last-update {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            transition: all var(--transition-speed) ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-active);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(124, 77, 255, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .stat-icon.plays {
+            background: rgba(0, 229, 255, 0.1);
+            color: #00e5ff;
+        }
+        .stat-icon.singer {
+            background: rgba(255, 64, 129, 0.1);
+            color: #ff4081;
+        }
+        .stat-info .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .stat-info .stat-lbl {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toolbar controls */
+        .controls-panel {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        .search-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all var(--transition-speed);
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        
+        .filter-selects {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .custom-select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all var(--transition-speed);
+        }
+        .custom-select:focus {
+            border-color: var(--accent);
+        }
+
+        .layout-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 4px;
+        }
+        .layout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all var(--transition-speed);
+        }
+        .layout-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Song List / Grid Container */
+        .songs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            transition: all var(--transition-speed);
+        }
+        .song-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .song-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--border-active);
+            box-shadow: 0 15px 30px rgba(124, 77, 255, 0.15);
+        }
+
+        /* Image part of card */
+        .card-img-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+            overflow: hidden;
+        }
+        .card-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .song-card:hover .card-img {
+            transform: scale(1.1);
+        }
+        .rank-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+        .duration-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Card Content */
+        .card-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .song-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .song-title a:hover {
+            color: #00e5ff;
+        }
+        .song-singer {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        /* Card stats info */
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+        }
+        .card-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+        }
+        .card-stat-item.likes i {
+            color: #ff4081;
+        }
+        .card-stat-item.plays i {
+            color: #00e5ff;
+        }
+
+        /* Footer tags */
+        .card-tags {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .tag-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag-badge:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Table View Layout (List mode) */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            display: none; /* Controlled by script */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        th {
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+        }
+        tr {
+            transition: background-color var(--transition-speed);
+        }
+        tr:hover {
+            background-color: var(--card-hover);
+        }
+        .table-thumb {
+            width: 60px;
+            height: 34px;
+            object-fit: cover;
+            border-radius: 4px;
+            vertical-align: middle;
+            border: 1px solid var(--border-glass);
+        }
+        .table-title {
+            font-weight: 600;
+        }
+        .table-title a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .table-title a:hover {
+            color: #00e5ff;
+        }
+        .table-rank {
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        /* Pagination & No Results */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .controls-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-selects {
+                justify-content: space-between;
+            }
+            .custom-select {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 11, 16, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(30px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.2rem;
+        }
+        .modal-close:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: rotate(90deg);
+        }
+        .modal-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+        @media (max-width: 600px) {
+            .modal-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .modal-song-info {
+                align-items: center;
+            }
+        }
+        .modal-cover-img {
+            width: 180px;
+            height: 101px; /* 16:9 ratio */
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--border-glass);
+        }
+        .modal-song-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+        .modal-rank-badge {
+            background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            align-self: flex-start;
+        }
+        @media (max-width: 600px) {
+            .modal-rank-badge {
+                align-self: center;
+            }
+        }
+        .modal-song-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .modal-song-singer {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        .modal-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+        .modal-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-glass);
+        }
+        .modal-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .modal-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(124, 77, 255, 0.15);
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+        .modal-link-btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .modal-divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-glass), transparent);
+            margin: 1.5rem 0;
+        }
+        .lyrics-section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lyrics-section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .lyrics-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+        }
+        .lyric-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 4px 0;
+        }
+        .lyric-ja {
+            font-family: 'Noto Sans JP', 'Noto Sans TC', sans-serif;
+            font-size: 1.3rem;
+            line-height: 2.3rem;
+            color: #ffffff;
+        }
+        .lyric-ja ruby {
+            ruby-position: over;
+        }
+        .lyric-ja rt {
+            font-size: 0.6em;
+            color: #00e5ff;
+            padding-bottom: 0.1em;
+            letter-spacing: 0.05em;
+        }
+        .lyric-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.05rem;
+            color: #ffb7d5;
+            margin-top: 4px;
+            line-height: 1.5rem;
+        }
+        .lyrics-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+            gap: 12px;
+        }
+        .lyrics-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(124, 77, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        .lyrics-error {
+            text-align: center;
+            padding: 3rem 0;
+            color: #ff1744;
+        }
+        .lyrics-error i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* App Layout holding main content and sidebar */
+        .app-layout {
+            display: flex;
+            max-width: 1500px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* Sidebar Chatbot styling */
+        .chatbot-sidebar {
+            width: 380px;
+            flex-shrink: 0;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 4rem);
+            position: sticky;
+            top: 2rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-speed) ease;
+        }
+        .chatbot-sidebar.collapsed {
+            width: 0;
+            margin-left: -2rem;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .chat-header {
+            padding: 1.25rem 1.5rem;
+            background: rgba(124, 77, 255, 0.1);
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        .chat-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .chat-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .chat-btn.active {
+            color: var(--accent);
+        }
+        
+        /* Key config box inside chat panel */
+        .api-key-config {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-glass);
+            display: none;
+        }
+        .api-key-config.show {
+            display: block;
+        }
+        .api-key-input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .api-key-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .api-key-input:focus {
+            border-color: var(--accent);
+        }
+        .api-key-btn {
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* Messages container */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .chat-msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+        }
+        .chat-msg.user {
+            align-self: flex-end;
+        }
+        .chat-msg.model {
+            align-self: flex-start;
+        }
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .chat-msg.user .msg-bubble {
+            background: var(--accent);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.model .msg-bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+        .msg-bubble p {
+            margin-bottom: 6px;
+        }
+        .msg-bubble p:last-child {
+            margin-bottom: 0;
+        }
+        .msg-bubble ul, .msg-bubble ol {
+            padding-left: 1.25rem;
+            margin-bottom: 6px;
+        }
+        .msg-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            align-self: flex-end;
+        }
+        .chat-msg.model .msg-time {
+            align-self: flex-start;
+        }
+        
+        /* Chat suggestions */
+        .chat-suggestions {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            border-top: 1px solid var(--border-glass);
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .suggestion-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestion-chip:hover {
+            background: rgba(124, 77, 255, 0.15);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        
+        /* Chat Input */
+        .chat-input-area {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-box {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            outline: none;
+            resize: none;
+            height: 40px;
+            max-height: 100px;
+            font-family: inherit;
+        }
+        .chat-input-box:focus {
+            border-color: var(--accent);
+        }
+        .chat-send-btn {
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+        .chat-send-btn:hover {
+            background: #9666ff;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        
+        /* Floating toggle button */
+        .chatbot-toggle-float {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(124, 77, 255, 0.4);
+            transition: all 0.3s;
+            z-index: 99;
+        }
+        .chatbot-toggle-float:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(124, 77, 255, 0.6);
+        }
+        
+        /* Layout responsive adaptations */
+        @media (max-width: 1200px) {
+            .app-layout {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            .chatbot-sidebar {
+                width: 100%;
+                height: 550px;
+                position: relative;
+                top: 0;
+            }
+            .chatbot-sidebar.collapsed {
+                display: none;
+            }
+            .chatbot-toggle-float {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glow Blobs -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Sakura Falling Canvas -->
+    <canvas id="sakura-canvas"></canvas>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,11,16,0.9); z-index:9999; justify-content:center; align-items:center; flex-direction:column; gap:1rem;">
+        <div style="border: 4px solid var(--border-glass); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+        <div style="font-size:1.2rem; font-weight:500;" id="loading-text">正在重新爬取最新歌曲排行...</div>
+        <div style="font-size:0.9rem; color:var(--text-secondary);" id="loading-subtext">預估需要 20-30 秒，請勿關閉網頁</div>
+    </div>
+    <style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+
+    <div class="app-layout">
+        <div class="main-content">
+            <div class="container" style="padding: 0; max-width: 100%;">
+                
+                <!-- Header -->
+                <header>
+                    <div class="logo-area">
+                        <i class="bi bi-music-note-list logo-icon"></i>
+                    </div>
+                    <h1>日語熱門歌曲排行榜</h1>
+                    <p class="subtitle">MaruMaru-X Most Liked Japanese Songs Top 200</p>
+                    <p class="last-update" id="update-time">資料更新時間: 2026-06-30 16:38:54</p>
+                </header>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-music-note"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-val">200</div>
+                            <div class="stat-lbl">歌曲總數</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-heart-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-val" id="total-likes">0</div>
+                            <div class="stat-lbl">點讚總數</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon plays"><i class="bi bi-play-circle-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-val" id="total-plays">0</div>
+                            <div class="stat-lbl">觀看次數</div>
+                        </div>
+                    </div>
+                </div>
+
+        <!-- Controls Toolbar -->
+        <div class="controls-panel">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="search-input" id="search" placeholder="搜尋歌名、歌手或標籤...">
+            </div>
+            <div class="filter-selects">
+                <select class="custom-select" id="sort-by">
+                    <option value="rank">按排名 (1-200)</option>
+                    <option value="likes-desc">按愛心數量 (多到少)</option>
+                    <option value="plays-desc">按播放次數 (多到少)</option>
+                    <option value="date-desc">按發佈時間 (新到舊)</option>
+                    <option value="duration-desc">按歌曲時長 (長到短)</option>
+                </select>
+                <select class="custom-select" id="filter-tag">
+                    <option value="all">所有標籤</option>
+                </select>
+                <!-- Refresh Button -->
+                <button class="custom-select" id="btn-refresh" style="background: rgba(124, 77, 255, 0.1); border-color: rgba(124, 77, 255, 0.3); color: #fff; cursor: pointer;">
+                    <i class="bi bi-arrow-clockwise"></i> 重新爬取資料
+                </button>
+            </div>
+            <div class="layout-toggle">
+                <button class="layout-btn active" id="btn-grid" title="網格檢視"><i class="bi bi-grid-fill"></i></button>
+                <button class="layout-btn" id="btn-table" title="列表檢視"><i class="bi bi-list-task"></i></button>
+            </div>
+        </div>
+
+        <!-- Grid View Layout -->
+        <div class="songs-grid" id="songs-grid">
+            <!-- Dynamic cards go here -->
+        </div>
+
+        <!-- Table View Layout -->
+        <div class="table-container" id="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">排名</th>
+                        <th style="width: 100px;">封面</th>
+                        <th>歌名</th>
+                        <th>歌手</th>
+                        <th style="width: 100px;">愛心數量</th>
+                        <th style="width: 100px;">播放次數</th>
+                        <th style="width: 80px;">時長</th>
+                        <th style="width: 120px;">發佈日期</th>
+                        <th>標籤</th>
+                    </tr>
+                </thead>
+                <tbody id="songs-table-body">
+                    <!-- Dynamic rows go here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Results -->
+        <div class="no-results" id="no-results">
+            <i class="bi bi-music-note-beamed" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 1rem;"></i>
+            沒有找到符合條件的歌曲。
+        </div>
+
+            </div>
+        </div>
+
+        <!-- Chatbot Sidebar -->
+        <div class="chatbot-sidebar" id="chatbot-sidebar">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="bi bi-robot" style="color: var(--accent); font-size: 1.25rem;"></i>
+                    <span>AI 歌曲小幫手</span>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="chat-btn" id="btn-toggle-key" title="設定 Gemini API Key">
+                        <i class="bi bi-key-fill"></i>
+                    </button>
+                    <button class="chat-btn" id="btn-chat-close" title="收合聊天室">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="api-key-config" id="api-key-panel">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 6px;">
+                    請輸入您的 Gemini API Key：
+                </div>
+                <div class="api-key-input-group">
+                    <input type="password" class="api-key-input" id="chat-api-key" placeholder="AIzaSy...">
+                    <button class="api-key-btn" id="btn-save-key">儲存</button>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; line-height: 1.2;">
+                    API Key 將存儲於您本機的 localStorage 中。若不填寫，將使用後端環境變數 GEMINI_API_KEY。
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-history">
+                <div class="chat-msg model">
+                    <div class="msg-bubble">
+                        哈囉！我是您的 AI 歌曲小幫手。我可以為您推薦 Top 200 的日文歌曲、分析歌手或提供歌曲類型建議。
+                        <br><br>
+                        請在上方設定您的 <strong>Gemini API Key</strong> 即可開始與我對談喔！
+                    </div>
+                    <div class="msg-time" id="welcome-msg-time">--:--</div>
+                </div>
+            </div>
+            
+            <div class="chat-suggestions">
+                <div class="suggestion-chip" onclick="sendSuggestion('推薦 3 首米津玄師的歌曲')">推薦米津玄師</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('有哪些標籤是 #ANM (動漫) 的熱門歌？')">動漫熱門歌</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('幫我推薦播放次數大於 100K 且愛心多的歌曲')">高播放量推薦</div>
+            </div>
+            
+            <div class="chat-input-area">
+                <textarea class="chat-input-box" id="chat-input" placeholder="問問我關於排行榜的歌... (按 Enter 發送)"></textarea>
+                <button class="chat-send-btn" id="btn-chat-send" title="發送訊息">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating toggle button to reopen chatbot -->
+    <div class="chatbot-toggle-float" id="chatbot-toggle-float" title="打開 AI 聊天室">
+        <i class="bi bi-chat-dots-fill"></i>
+    </div>
+
+    <!-- Lyrics Modal -->
+    <div id="lyrics-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeLyricsModal()"><i class="bi bi-x-lg"></i></button>
+            <div class="modal-header">
+                <img id="modal-cover" src="" alt="封面" class="modal-cover-img">
+                <div class="modal-song-info">
+                    <span id="modal-rank" class="modal-rank-badge">#1</span>
+                    <h2 id="modal-title" class="modal-song-title">Song Title</h2>
+                    <h3 id="modal-singer" class="modal-song-singer">Singer</h3>
+                    <div class="modal-stats">
+                        <span class="modal-stat-item"><i class="bi bi-heart-fill" style="color: #ff4081;"></i> <span id="modal-likes">0</span></span>
+                        <span class="modal-stat-item"><i class="bi bi-play-circle-fill" style="color: #00e5ff;"></i> <span id="modal-plays">0</span></span>
+                        <span class="modal-stat-item"><i class="bi bi-clock"></i> <span id="modal-duration">0:00</span></span>
+                        <span class="modal-stat-item"><i class="bi bi-calendar3"></i> <span id="modal-date">未知</span></span>
+                    </div>
+                    <div id="modal-tags" class="modal-tags-container"></div>
+                    <div>
+                        <a id="modal-external-link" href="" target="_blank" class="modal-link-btn"><i class="bi bi-box-arrow-up-right"></i> 前往 MaruMaru 原網頁</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="modal-divider">
+            <div class="modal-body">
+                <h4 class="lyrics-section-title">歌詞 Lyrics</h4>
+                <div id="modal-lyrics-loading" class="lyrics-loading">
+                    <div class="spinner"></div>
+                    <p>正在載入歌詞...</p>
+                </div>
+                <div id="modal-lyrics-error" class="lyrics-error" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <p id="modal-error-message">載入歌詞失敗。</p>
+                </div>
+                <div id="modal-lyrics-container" class="lyrics-container">
+                    <!-- Lyrics lines go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection -->
+    <script>
+        // Data injected from python for static preview
+        const staticSongs = [{"排名": 1, "封面": "https://i.ytimg.com/vi/SX_ViT4Ra7k/sddefault.jpg", "歌名": "Lemon", "歌手": "米津玄師", "愛心數量": "9.5K", "愛心數量(數值)": "9500", "播放次數": "496.3K", "時長": "4:35", "發佈日期": "2018-03-14", "標籤": "#JPOP, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn42zjre4"}, {"排名": 2, "封面": "https://i.ytimg.com/vi/-tKVN2mAKRI/sddefault.jpg", "歌名": "打上花火", "歌手": "DAOKO×米津玄師", "愛心數量": "7.4K", "愛心數量(數值)": "7400", "播放次數": "336.2K", "時長": "4:53", "發佈日期": "2017-08-16", "標籤": "#ANM, #DAOKO, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ywn12djr7l"}, {"排名": 3, "封面": "https://i.ytimg.com/vi/by4SYYWlhEs/sddefault.jpg", "歌名": "夜に駆ける", "歌手": "YOASOBI", "愛心數量": "6.4K", "愛心數量(數值)": "6400", "播放次數": "375.4K", "時長": "4:22", "發佈日期": "2019-12-15", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o711xqok"}, {"排名": 4, "封面": "https://i.ytimg.com/vi/x1FV6IrjZCY/sddefault.jpg", "歌名": "紅蓮華", "歌手": "LiSA", "愛心數量": "5.4K", "愛心數量(數值)": "5400", "播放次數": "248K", "時長": "3:56", "發佈日期": "2019-07-03", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw1830o7"}, {"排名": 5, "封面": "https://i.ytimg.com/vi/jhOVibLEDhA/sddefault.jpg", "歌名": "恋", "歌手": "星野源", "愛心數量": "4.9K", "愛心數量(數值)": "4900", "播放次數": "228.7K", "時長": "4:53", "發佈日期": "2016-10-05", "標籤": "#JPOP, #星野源", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o797drkq"}, {"排名": 6, "封面": "https://i.ytimg.com/vi/GcpsTmDO9k0/sddefault.jpg", "歌名": "First Love", "歌手": "宇多田ヒカル", "愛心數量": "4.8K", "愛心數量(數值)": "4800", "播放次數": "226K", "時長": "4:16", "發佈日期": "1999-03-10", "標籤": "#JPOP, #宇多田ヒカル", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o71dqokq"}, {"排名": 7, "封面": "https://i.ytimg.com/vi/4DxL6IKmXx4/sddefault.jpg", "歌名": "炎", "歌手": "LiSA", "愛心數量": "4.4K", "愛心數量(數值)": "4400", "播放次數": "210K", "時長": "5:02", "發佈日期": "2020-10-14", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpv4k9nd"}, {"排名": 8, "封面": "https://i.ytimg.com/vi/1Bk9YpwWEsg/sddefault.jpg", "歌名": "世界が終るまでは…", "歌手": "WANDS", "愛心數量": "4.4K", "愛心數量(數值)": "4400", "播放次數": "233.4K", "時長": "5:18", "發佈日期": "1994-06-28", "標籤": "#ANM, #WANDS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-evr8qzxrm5"}, {"排名": 9, "封面": "https://i.ytimg.com/vi/Y4nEEZwckuU/sddefault.jpg", "歌名": "群青", "歌手": "YOASOBI", "愛心數量": "4.3K", "愛心數量(數值)": "4300", "播放次數": "192.6K", "時長": "4:23", "發佈日期": "2020-09-01", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy56lmn3"}, {"排名": 10, "封面": "https://i.ytimg.com/vi/o6wtDPVkKqI/sddefault.jpg", "歌名": "残酷な天使のテーゼ", "歌手": "高橋洋子", "愛心數量": "4K", "愛心數量(數值)": "4000", "播放次數": "102.7K", "時長": "4:04", "發佈日期": "1995-10-25", "標籤": "#ANM, #高橋洋子", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm93y4np"}, {"排名": 11, "封面": "https://i.ytimg.com/vi/gJX2iy6nhHc/sddefault.jpg", "歌名": "灰色と青 ( + 菅田将暉)", "歌手": "米津玄師", "愛心數量": "4K", "愛心數量(數值)": "4000", "播放次數": "179.1K", "時長": "5:43", "發佈日期": "2017-11-01", "標籤": "#JPOP, #米津玄師, #菅田将暉", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9187oz3"}, {"排名": 12, "封面": "https://i.ytimg.com/vi/kzZ6KXDM1RI/sddefault.jpg", "歌名": "ドライフラワー", "歌手": "優里", "愛心數量": "4K", "愛心數量(數值)": "4000", "播放次數": "193.1K", "時長": "4:48", "發佈日期": "2020-10-25", "標籤": "#JPOP, #優里", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvol954do2"}, {"排名": 13, "封面": "https://i.ytimg.com/vi/PDSkFeMVNFs/sddefault.jpg", "歌名": "前前前世 (movie ver.)", "歌手": "RADWIMPS", "愛心數量": "3.9K", "愛心數量(數值)": "3900", "播放次數": "132.9K", "時長": "4:53", "發佈日期": "2016-08-24", "標籤": "#ANM, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9qy9nz3"}, {"排名": 14, "封面": "https://i.ytimg.com/vi/dy90tA3TT1c/sddefault.jpg", "歌名": "怪物", "歌手": "YOASOBI", "愛心數量": "3.9K", "愛心數量(數值)": "3900", "播放次數": "182.4K", "時長": "3:29", "發佈日期": "2021-01-06", "標籤": "#ANM, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw136qo7"}, {"排名": 15, "封面": "https://i.ytimg.com/vi/B0GpxW8K0vY/sddefault.jpg", "歌名": "secret base～君がくれたもの～ (10 years after Ver.)", "歌手": "本間芽衣子(茅野愛衣)、安城鳴子(戸松遥)、鶴見知利子(早見沙織)", "愛心數量": "3.8K", "愛心數量(數值)": "3800", "播放次數": "79.4K", "時長": "5:53", "發佈日期": "2011-04-27", "標籤": "#ANM, #茅野愛衣, #戸松遥, #早見沙織", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-vxn5vywo9e"}, {"排名": 16, "封面": "https://i.ytimg.com/vi/ZRtdQ81jPUQ/sddefault.jpg", "歌名": "アイドル", "歌手": "YOASOBI", "愛心數量": "3.7K", "愛心數量(數值)": "3700", "播放次數": "200.1K", "時長": "3:46", "發佈日期": "2023-04-12", "標籤": "#ANM, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o71qkqok"}, {"排名": 17, "封面": "https://i.ytimg.com/vi/n89SKAymNfA/sddefault.jpg", "歌名": "なんでもないや (movie ver.)", "歌手": "RADWIMPS", "愛心數量": "3.7K", "愛心數量(數值)": "3700", "播放次數": "120.6K", "時長": "5:45", "發佈日期": "2016-08-24", "標籤": "#ANM, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-evr845ppnm"}, {"排名": 18, "封面": "https://i.ytimg.com/vi/JzurtO4yHrM/sddefault.jpg", "歌名": "君が好きだと叫びたい", "歌手": "BAAD", "愛心數量": "3.7K", "愛心數量(數值)": "3700", "播放次數": "140.8K", "時長": "3:48", "發佈日期": "1994-03-12", "標籤": "#ANM, #BAAD", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxykxnyw"}, {"排名": 19, "封面": "https://i.ytimg.com/vi/TQ8WlA2GXbk/sddefault.jpg", "歌名": "Pretender", "歌手": "Official髭男dism", "愛心數量": "3.3K", "愛心數量(數值)": "3300", "播放次數": "132.5K", "時長": "5:36", "發佈日期": "2019-05-15", "標籤": "#JPOP, #Official髭男dism", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqljlmn4"}, {"排名": 20, "封面": "https://i.ytimg.com/vi/vjj16qog4vQ/sddefault.jpg", "歌名": "明日晴れるかな", "歌手": "桑田佳祐", "愛心數量": "3.3K", "愛心數量(數值)": "3300", "播放次數": "152.1K", "時長": "5:16", "發佈日期": "2007-05-16", "標籤": "#JPOP, #サザンオールスターズ, #桑田佳祐", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr66mgr35"}, {"排名": 21, "封面": "https://i.ytimg.com/vi/mF5Qq2YheTg/sddefault.jpg", "歌名": "雪の華", "歌手": "中島美嘉", "愛心數量": "3.2K", "愛心數量(數值)": "3200", "播放次數": "99.4K", "時長": "5:50", "發佈日期": "2004-06-21", "標籤": "#JPOP, #中島美嘉", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3kvkokw"}, {"排名": 22, "封面": "https://i.ytimg.com/vi/6xZWW8ZQvVs/sddefault.jpg", "歌名": "僕が死のうと思ったのは", "歌手": "中島美嘉", "愛心數量": "3.2K", "愛心數量(數值)": "3200", "播放次數": "98.2K", "時長": "6:22", "發佈日期": "2013-08-28", "標籤": "#JPOP, #中島美嘉", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd746rd4"}, {"排名": 23, "封面": "https://i.ytimg.com/vi/kxs9Su_mbpU/sddefault.jpg", "歌名": "カタオモイ", "歌手": "Aimer", "愛心數量": "3.2K", "愛心數量(數值)": "3200", "播放次數": "122.4K", "時長": "3:42", "發佈日期": "2016-09-21", "標籤": "#JPOP, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4wzjre4"}, {"排名": 24, "封面": "https://i.ytimg.com/vi/BEULybZnLO8/sddefault.jpg", "歌名": "極楽浄土", "歌手": "GARNiDELiA", "愛心數量": "3K", "愛心數量(數值)": "3000", "播放次數": "95.1K", "時長": "3:46", "發佈日期": "2016-08-17", "標籤": "#JPOP, #GARNiDELiA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-evr859lrm5"}, {"排名": 25, "封面": "https://i.ytimg.com/vi/_zqbQiCyFFo/sddefault.jpg", "歌名": "Butter-fly", "歌手": "和田光司", "愛心數量": "3K", "愛心數量(數值)": "3000", "播放次數": "72.6K", "時長": "4:19", "發佈日期": "1999-09-22", "標籤": "#ANM, #和田光司", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r05k42nv"}, {"排名": 26, "封面": "https://i.ytimg.com/vi/7zBeQezaz4U/sddefault.jpg", "歌名": "クリスマスソング", "歌手": "back number", "愛心數量": "2.9K", "愛心數量(數值)": "2900", "播放次數": "133.2K", "時長": "5:43", "發佈日期": "2015-11-18", "標籤": "#JPOP, #back number", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw6mqr7x"}, {"排名": 27, "封面": "https://i.ytimg.com/vi/DwTinTO0o9I/sddefault.jpg", "歌名": "キセキ", "歌手": "GReeeeN", "愛心數量": "2.7K", "愛心數量(數值)": "2700", "播放次數": "106.5K", "時長": "6:32", "發佈日期": "2008-05-28", "標籤": "#JPOP, #GReeeeN", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-6xqrdj6rd4"}, {"排名": 28, "封面": "https://i.ytimg.com/vi/siQJhIp-UTU/sddefault.jpg", "歌名": "手紙～拝啓十五の君へ～", "歌手": "アンジェラ・アキ", "愛心數量": "2.6K", "愛心數量(數值)": "2600", "播放次數": "87.2K", "時長": "6:14", "發佈日期": "2008-09-17", "標籤": "#JPOP, #アンジェラ・アキ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-260rm20opz"}, {"排名": 29, "封面": "https://i.ytimg.com/vi/WWB01IuMvzA/hqdefault.jpg", "歌名": "God knows...", "歌手": "涼宮ハルヒ(平野綾)", "愛心數量": "2.6K", "愛心數量(數值)": "2600", "播放次數": "54.8K", "時長": "4:41", "發佈日期": "2006-06-21", "標籤": "#ANM, #平野綾", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrv42lr3k"}, {"排名": 30, "封面": "https://i.ytimg.com/vi/FXsGCieXm1E/sddefault.jpg", "歌名": "恋愛サーキュレーション", "歌手": "千石撫子(花澤香菜)", "愛心數量": "2.6K", "愛心數量(數值)": "2600", "播放次數": "81.8K", "時長": "4:14", "發佈日期": "2010-01-27", "標籤": "#ANM, #花澤香菜", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r0evgnv8"}, {"排名": 31, "封面": "https://i.ytimg.com/vi/WPl10ZrhCtk/sddefault.jpg", "歌名": "悪魔の子", "歌手": "ヒグチアイ", "愛心數量": "2.6K", "愛心數量(數值)": "2600", "播放次數": "87.2K", "時長": "3:50", "發佈日期": "2022-01-10", "標籤": "#ANM, #ヒグチアイ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okwdlvoq"}, {"排名": 32, "封面": "https://i.ytimg.com/vi/1oMxrHXzOsY/sddefault.jpg", "歌名": "ピースサイン", "歌手": "米津玄師", "愛心數量": "2.5K", "愛心數量(數值)": "2500", "播放次數": "106.4K", "時長": "4:17", "發佈日期": "2017-06-21", "標籤": "#ANM, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-vxn5pelo9e"}, {"排名": 33, "封面": "https://i.ytimg.com/vi/8iuLXODzL04/sddefault.jpg", "歌名": "たぶん", "歌手": "YOASOBI", "愛心數量": "2.5K", "愛心數量(數值)": "2500", "播放次數": "102.1K", "時長": "4:24", "發佈日期": "2020-07-31", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy560kn3"}, {"排名": 34, "封面": "https://i.ytimg.com/vi/0xSiBpUdW4E/sddefault.jpg", "歌名": "マリーゴールド", "歌手": "あいみょん", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "115.4K", "時長": "5:22", "發佈日期": "2018-08-08", "標籤": "#JPOP, #あいみょん", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm79drpz"}, {"排名": 35, "封面": "https://i.ytimg.com/vi/ony539T074w/sddefault.jpg", "歌名": "白日", "歌手": "King Gnu", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "110.5K", "時長": "4:40", "發佈日期": "2019-02-22", "標籤": "#JPOP, #King Gnu", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrdz50od4"}, {"排名": 36, "封面": "https://i.ytimg.com/vi/mvkbCZfwWzA/sddefault.jpg", "歌名": "Ref:rain", "歌手": "Aimer", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "68.7K", "時長": "4:30", "發佈日期": "2018-02-21", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r0p70ov8"}, {"排名": 37, "封面": "https://i.ytimg.com/vi/E0d2uEQJbXs/sddefault.jpg", "歌名": "晴る", "歌手": "ヨルシカ", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "70.7K", "時長": "4:43", "發佈日期": "2024-01-05", "標籤": "#ANM, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94oglyjpr0"}, {"排名": 38, "封面": "https://i.ytimg.com/vi/c6rCRy6SrtU/sddefault.jpg", "歌名": "光るなら", "歌手": "Goose house", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "58K", "時長": "4:15", "發佈日期": "2014-11-19", "標籤": "#ANM, #Goose house", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n34jvrkw"}, {"排名": 39, "封面": "https://i.ytimg.com/vi/lHWVOfC41L4/sddefault.jpg", "歌名": "風になる", "歌手": "つじあやの", "愛心數量": "2.4K", "愛心數量(數值)": "2400", "播放次數": "63.7K", "時長": "6:36", "發佈日期": "2002-06-26", "標籤": "#ANM, #つじあやの", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-2go28dq3o3"}, {"排名": 40, "封面": "https://i.ytimg.com/vi/oZpYEEcvu5I/sddefault.jpg", "歌名": "晩餐歌", "歌手": "tuki.", "愛心數量": "2.3K", "愛心數量(數值)": "2300", "播放次數": "66.5K", "時長": "3:40", "發佈日期": "2023-09-29", "標籤": "#JPOP, #tuki.", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3k6w7ok"}, {"排名": 41, "封面": "https://i.ytimg.com/vi/EqVoCfSwfUY/sddefault.jpg", "歌名": "瞳をとじて", "歌手": "平井堅", "愛心數量": "2.3K", "愛心數量(數值)": "2300", "播放次數": "91.8K", "時長": "6:06", "發佈日期": "2004-04-28", "標籤": "#JPOP, #平井堅", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-9lkrz37oeq"}, {"排名": 42, "封面": "https://i.ytimg.com/vi/iykAM_McguQ/sddefault.jpg", "歌名": "優しい彗星", "歌手": "YOASOBI", "愛心數量": "2.3K", "愛心數量(數值)": "2300", "播放次數": "108.4K", "時長": "3:36", "發佈日期": "2021-01-20", "標籤": "#ANM, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqlk3qn4"}, {"排名": 43, "封面": "https://i.ytimg.com/vi/UhwHbSi4Z58/sddefault.jpg", "歌名": "unravel", "歌手": "TK from 凛として時雨", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "45.4K", "時長": "4:27", "發佈日期": "2014-07-23", "標籤": "#ANM, #凛として時雨", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy5eymn3"}, {"排名": 44, "封面": "https://i.ytimg.com/vi/rKsQ-3N-Bks/sddefault.jpg", "歌名": "ひまわりの約束", "歌手": "秦基博", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "86.4K", "時長": "5:17", "發佈日期": "2014-08-06", "標籤": "#ANM, #秦基博", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvol9xdo2w"}, {"排名": 45, "封面": "https://i.ytimg.com/vi/Dx_fKPBPYUI/sddefault.jpg", "歌名": "LOSER", "歌手": "米津玄師", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "87.1K", "時長": "4:03", "發佈日期": "2016-09-28", "標籤": "#JPOP, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94og2d0n0j"}, {"排名": 46, "封面": "https://i.ytimg.com/vi/zTPhw34V3rs/sddefault.jpg", "歌名": "逢いたくていま", "歌手": "MISIA", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "88.1K", "時長": "5:59", "發佈日期": "2009-11-18", "標籤": "#JPOP, #MISIA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3klwkok"}, {"排名": 47, "封面": "https://i.ytimg.com/vi/T8y_RsF4TSw/sddefault.jpg", "歌名": "ハッピーエンド", "歌手": "back number", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "118.8K", "時長": "5:19", "發佈日期": "2016-11-16", "標籤": "#JPOP, #back number", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r098grv8"}, {"排名": 48, "封面": "https://i.ytimg.com/vi/cbqvxDTLMps/sddefault.jpg", "歌名": "ベテルギウス", "歌手": "優里", "愛心數量": "2.2K", "愛心數量(數值)": "2200", "播放次數": "90.5K", "時長": "4:52", "發佈日期": "2021-11-01", "標籤": "#JPOP, #優里", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okwd6joq"}, {"排名": 49, "封面": "https://i.ytimg.com/vi/HPkLvJn3rAI/sddefault.jpg", "歌名": "only my railgun", "歌手": "fripSide", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "50.3K", "時長": "4:22", "發佈日期": "2009-11-04", "標籤": "#ANM, #fripSide, #南條愛乃", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqlm44n4"}, {"排名": 50, "封面": "https://i.ytimg.com/vi/l1ky3XPBdBE/sddefault.jpg", "歌名": "猫", "歌手": "DISH//", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "93.2K", "時長": "4:37", "發佈日期": "2017-08-16", "標籤": "#JPOP, #DISH//", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl5zxr0"}, {"排名": 51, "封面": "https://i.ytimg.com/vi/iw_1zU2MSc8/sddefault.jpg", "歌名": "トリセツ", "歌手": "西野カナ", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "75.1K", "時長": "4:29", "發佈日期": "2015-09-09", "標籤": "#JPOP, #西野カナ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqlmqqn4"}, {"排名": 52, "封面": "https://i.ytimg.com/vi/7940nuwCEYA/sddefault.jpg", "歌名": "まちがいさがし", "歌手": "菅田将暉", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "82.3K", "時長": "4:03", "發佈日期": "2019-05-14", "標籤": "#JPOP, #菅田将暉", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrv40gyr3"}, {"排名": 53, "封面": "https://i.ytimg.com/vi/UM9XNpgrqVk/sddefault.jpg", "歌名": "怪獣の花唄", "歌手": "Vaundy", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "63.7K", "時長": "3:53", "發佈日期": "2020-05-11", "標籤": "#JPOP, #Vaundy", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rj9dxzn9"}, {"排名": 54, "封面": "https://i.ytimg.com/vi/KpsJWFuVTdI/sddefault.jpg", "歌名": "ブルーバード", "歌手": "いきものがかり", "愛心數量": "2.1K", "愛心數量(數值)": "2100", "播放次數": "41K", "時長": "3:37", "發佈日期": "2008-07-09", "標籤": "#ANM, #いきものがかり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o7121zok"}, {"排名": 55, "封面": "https://i.ytimg.com/vi/li6kSt3sb3k/sddefault.jpg", "歌名": "好きだから。", "歌手": "『ユイカ』", "愛心數量": "2K", "愛心數量(數值)": "2000", "播放次數": "84.1K", "時長": "5:06", "發佈日期": "2021-06-27", "標籤": "#JPOP, #『ユイカ』", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr6q9len3"}, {"排名": 56, "封面": "https://i.ytimg.com/vi/w5OUAY1j3gQ/sddefault.jpg", "歌名": "again", "歌手": "YUI", "愛心數量": "2K", "愛心數量(數值)": "2000", "播放次數": "27.3K", "時長": "4:18", "發佈日期": "2009-06-03", "標籤": "#ANM, #YUI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-2go28163o3"}, {"排名": 57, "封面": "https://i.ytimg.com/vi/tLQLa6lM3Us/sddefault.jpg", "歌名": "残響散歌", "歌手": "Aimer", "愛心數量": "2K", "愛心數量(數值)": "2000", "播放次數": "74.5K", "時長": "3:02", "發佈日期": "2022-01-12", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9myl7oz"}, {"排名": 58, "封面": "https://i.ytimg.com/vi/jpV5jeFlt_E/sddefault.jpg", "歌名": "君の知らない物語", "歌手": "supercell", "愛心數量": "2K", "愛心數量(數值)": "2000", "播放次數": "38.8K", "時長": "5:56", "發佈日期": "2009-08-12", "標籤": "#ANM, #supercell", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e1pox2xryw"}, {"排名": 59, "封面": "https://i.ytimg.com/vi/1tk1pqwrOys/sddefault.jpg", "歌名": "廻廻奇譚", "歌手": "Eve", "愛心數量": "1.9K", "愛心數量(數值)": "1900", "播放次數": "82.9K", "時長": "3:44", "發佈日期": "2020-10-03", "標籤": "#ANM, #Eve", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl5jkr0"}, {"排名": 60, "封面": "https://i.ytimg.com/vi/-EKxzId_Sj4/sddefault.jpg", "歌名": "アイネクライネ", "歌手": "米津玄師", "愛心數量": "1.9K", "愛心數量(數值)": "1900", "播放次數": "67.9K", "時長": "4:56", "發佈日期": "2014-04-23", "標籤": "#JPOP, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4k6xre4"}, {"排名": 61, "封面": "https://i.ytimg.com/vi/F64yFFnZfkI/sddefault.jpg", "歌名": "言って。", "歌手": "ヨルシカ", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "50.4K", "時長": "4:04", "發佈日期": "2017-06-28", "標籤": "#JPOP, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm61znpz"}, {"排名": 62, "封面": "https://i.ytimg.com/vi/E3hvxbM_ubw/sddefault.jpg", "歌名": "大きな古時計", "歌手": "平井堅", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "38.6K", "時長": "5:21", "發佈日期": "2002-08-28", "標籤": "#JPOP, #平井堅", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy562kn3"}, {"排名": 63, "封面": "https://i.ytimg.com/vi/MtLHwqbE1eI/sddefault.jpg", "歌名": "夢灯籠", "歌手": "RADWIMPS", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "43.4K", "時長": "2:12", "發佈日期": "2016-08-24", "標籤": "#ANM, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ywn1z0xwr7"}, {"排名": 64, "封面": "https://i.ytimg.com/vi/-VKIqrvVOpo/sddefault.jpg", "歌名": "ただ君に晴れ", "歌手": "ヨルシカ", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "52.4K", "時長": "3:20", "發佈日期": "2018-05-09", "標籤": "#JPOP, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm455rpz"}, {"排名": 65, "封面": "https://i.ytimg.com/vi/9lVPAWLWtWc/sddefault.jpg", "歌名": "花に亡霊", "歌手": "ヨルシカ", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "53.3K", "時長": "4:03", "發佈日期": "2020-04-22", "標籤": "#ANM, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3k2gzok"}, {"排名": 66, "封面": "https://i.ytimg.com/vi/dlFA0Zq1k2A/sddefault.jpg", "歌名": "シルエット", "歌手": "KANA-BOON", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "68.7K", "時長": "4:26", "發佈日期": "2014-11-26", "標籤": "#ANM, #KANA-BOON", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr667lr35"}, {"排名": 67, "封面": "https://i.ytimg.com/vi/gN24W_psMpE/sddefault.jpg", "歌名": "ninelie", "歌手": "Aimer with chelly(EGOIST)", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "45.9K", "時長": "4:35", "發佈日期": "2016-05-11", "標籤": "#ANM, #Aimer, #EGOIST", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy23mn3z"}, {"排名": 68, "封面": "https://i.ytimg.com/vi/1wxTksLZ1Mw/hqdefault.jpg", "歌名": "粉雪", "歌手": "レミオロメン", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "54.2K", "時長": "5:33", "發佈日期": "2005-11-16", "標籤": "#JPOP, #レミオロメン", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v14o7znkqx"}, {"排名": 69, "封面": "https://i.ytimg.com/vi/B7BxrAAXl94/sddefault.jpg", "歌名": "ギターと孤独と蒼い惑星", "歌手": "結束バンド", "愛心數量": "1.8K", "愛心數量(數值)": "1800", "播放次數": "59.1K", "時長": "3:54", "發佈日期": "2022-11-06", "標籤": "#ANM, #結束バンド", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpv6mynd"}, {"排名": 70, "封面": "https://i.ytimg.com/vi/eglYGbybkrY/sddefault.jpg", "歌名": "嘘", "歌手": "シド", "愛心數量": "1.7K", "愛心數量(數值)": "1700", "播放次數": "30.4K", "時長": "3:31", "發佈日期": "2009-04-29", "標籤": "#ANM, #シド", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4qzkjre"}, {"排名": 71, "封面": "https://i.ytimg.com/vi/5TR1wJCimyk/sddefault.jpg", "歌名": "涙そうそう", "歌手": "夏川りみ", "愛心數量": "1.7K", "愛心數量(數值)": "1700", "播放次數": "61.1K", "時長": "4:22", "發佈日期": "2001-03-23", "標籤": "#JPOP, #夏川りみ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-2evr8qprm5"}, {"排名": 72, "封面": "https://i.ytimg.com/vi/Qp3b-RXtz4w/sddefault.jpg", "歌名": "うっせぇわ", "歌手": "Ado", "愛心數量": "1.7K", "愛心數量(數值)": "1700", "播放次數": "58.8K", "時長": "3:23", "發佈日期": "2020-10-23", "標籤": "#JPOP, #Ado", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9m224oz"}, {"排名": 73, "封面": "https://i.ytimg.com/vi/sHgce2bDxdg/sddefault.jpg", "歌名": "渡月橋 ～君 想ふ～", "歌手": "倉木麻衣", "愛心數量": "1.7K", "愛心數量(數值)": "1700", "播放次數": "48.5K", "時長": "4:10", "發佈日期": "2017-04-12", "標籤": "#ANM, #倉木麻衣", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rj6e3n9x"}, {"排名": 74, "封面": "https://i.ytimg.com/vi/cvxm8GJJHqQ/hqdefault.jpg", "歌名": "心做し", "歌手": "花たん", "愛心數量": "1.7K", "愛心數量(數值)": "1700", "播放次數": "45.2K", "時長": "4:29", "發佈日期": "2021-12-10", "標籤": "#COV, #花たん", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl55r0j"}, {"排名": 75, "封面": "https://i.ytimg.com/vi/0YF8vecQWYs/sddefault.jpg", "歌名": "カワキヲアメク", "歌手": "美波", "愛心數量": "1.6K", "愛心數量(數值)": "1600", "播放次數": "56K", "時長": "4:14", "發佈日期": "2019-01-30", "標籤": "#ANM, #美波", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr6zpvn35"}, {"排名": 76, "封面": "https://i.ytimg.com/vi/sAuEeM_6zpk/sddefault.jpg", "歌名": "あの夢をなぞって", "歌手": "YOASOBI", "愛心數量": "1.6K", "愛心數量(數值)": "1600", "播放次數": "67.2K", "時長": "4:00", "發佈日期": "2020-01-18", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl940r0"}, {"排名": 77, "封面": "https://i.ytimg.com/vi/lzAyrgSqeeE/sddefault.jpg", "歌名": "orion", "歌手": "米津玄師", "愛心數量": "1.6K", "愛心數量(數值)": "1600", "播放次數": "49.6K", "時長": "4:51", "發佈日期": "2017-02-15", "標籤": "#ANM, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rml2dnpz"}, {"排名": 78, "封面": "https://i.ytimg.com/vi/Xs0Lxif1u9E/sddefault.jpg", "歌名": "すずめ feat.十明", "歌手": "RADWIMPS", "愛心數量": "1.6K", "愛心數量(數值)": "1600", "播放次數": "52.7K", "時長": "3:57", "發佈日期": "2022-09-30", "標籤": "#ANM, #十明, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o71mmzok"}, {"排名": 79, "封面": "https://i.ytimg.com/vi/GkY9dFAECt8/sddefault.jpg", "歌名": "Wherever You Are", "歌手": "ONE OK ROCK", "愛心數量": "1.6K", "愛心數量(數值)": "1600", "播放次數": "46.5K", "時長": "4:56", "發佈日期": "2010-06-09", "標籤": "#JPOP, #ONE OK ROCK", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrzwxyreq"}, {"排名": 80, "封面": "https://i.ytimg.com/vi/_0bb30seo28/sddefault.jpg", "歌名": "小さな恋のうた", "歌手": "粉ミルク", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "53.4K", "時長": "4:46", "發佈日期": "2015-12-11", "標籤": "#COV, #粉ミルク", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3qevokw"}, {"排名": 81, "封面": "https://i.ytimg.com/vi/zuoVd2QNxJo/sddefault.jpg", "歌名": "青のすみか", "歌手": "キタニタツヤ", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "65.9K", "時長": "3:21", "發佈日期": "2023-07-19", "標籤": "#ANM, #キタニタツヤ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okwm3joq"}, {"排名": 82, "封面": "https://i.ytimg.com/vi/2B6nj38AdD0/sddefault.jpg", "歌名": "紅蓮の弓矢", "歌手": "Linked Horizon", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "46.8K", "時長": "5:17", "發佈日期": "2013-07-10", "標籤": "#ANM, #Linked Horizon", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrz5qz0re"}, {"排名": 83, "封面": "https://i.ytimg.com/vi/JoJ6lnF07U4/sddefault.jpg", "歌名": "小さな恋のうた", "歌手": "MONGOL800", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "66.2K", "時長": "3:43", "發佈日期": "2001-09-16", "標籤": "#JPOP, #MONGOL800", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94oglxepr0"}, {"排名": 84, "封面": "https://i.ytimg.com/vi/pHsaIsUTHdc/sddefault.jpg", "歌名": "六等星の夜", "歌手": "Aimer", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "16.5K", "時長": "5:38", "發佈日期": "2011-09-07", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymre1z0wnd"}, {"排名": 85, "封面": "https://i.ytimg.com/vi/1aPOj0ERTEc/sddefault.jpg", "歌名": "crossing field", "歌手": "LiSA", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "30K", "時長": "4:09", "發佈日期": "2012-08-08", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9mv7oz3"}, {"排名": 86, "封面": "https://i.ytimg.com/vi/1re05dQMhzw/sddefault.jpg", "歌名": "THERE IS A REASON", "歌手": "鈴木このみ", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "40K", "時長": "4:53", "發佈日期": "2017-12-20", "標籤": "#ANM, #鈴木このみ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o7ggzokq"}, {"排名": 87, "封面": "https://i.ytimg.com/vi/uxYLXaXtH9I/sddefault.jpg", "歌名": "レオ", "歌手": "優里", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "57K", "時長": "4:29", "發佈日期": "2022-01-12", "標籤": "#JPOP, #優里", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxqvz7ry"}, {"排名": 88, "封面": "https://i.ytimg.com/vi/bN1t3-2X3aM/sddefault.jpg", "歌名": "茜さす", "歌手": "Aimer", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "39.7K", "時長": "5:40", "發佈日期": "2016-11-16", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rjjq6r9x"}, {"排名": 89, "封面": "https://i.ytimg.com/vi/A_1t2Dkd2Io/hqdefault.jpg", "歌名": "恋音と雨空", "歌手": "AAA", "愛心數量": "1.5K", "愛心數量(數值)": "1500", "播放次數": "40.7K", "時長": "5:19", "發佈日期": "2013-09-04", "標籤": "#JPOP, #AAA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-072r9d5oz3"}, {"排名": 90, "封面": "https://i.ytimg.com/vi/LKqgY0VKZX4/sddefault.jpg", "歌名": "Departures ～あなたにおくるアイの歌～", "歌手": "EGOIST", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "24.5K", "時長": "4:20", "發佈日期": "2011-11-30", "標籤": "#ANM, #EGOIST", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymreq66rd3"}, {"排名": 91, "封面": "https://i.ytimg.com/vi/t6xdg6TKbyQ/sddefault.jpg", "歌名": "プラネタリウム", "歌手": "大塚愛", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "33.5K", "時長": "5:11", "發佈日期": "2005-09-21", "標籤": "#JPOP, #大塚愛", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o71v7okq"}, {"排名": 92, "封面": "https://i.ytimg.com/vi/YnSW8ian29w/sddefault.jpg", "歌名": "踊", "歌手": "Ado", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "47K", "時長": "3:29", "發佈日期": "2021-04-27", "標籤": "#JPOP, #Ado", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3kgp6ok"}, {"排名": 93, "封面": "https://i.ytimg.com/vi/EQ94zflNqn4/sddefault.jpg", "歌名": "愛にできることはまだあるかい", "歌手": "RADWIMPS", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "54.7K", "時長": "7:29", "發佈日期": "2019-07-19", "標籤": "#ANM, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpvjppnd"}, {"排名": 94, "封面": "https://i.ytimg.com/vi/3eytpBOkOFA/sddefault.jpg", "歌名": "祝福", "歌手": "YOASOBI", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "58.4K", "時長": "3:18", "發佈日期": "2022-10-01", "標籤": "#ANM, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl005r0"}, {"排名": 95, "封面": "https://i.ytimg.com/vi/M80XXxMKFWw/hqdefault.jpg", "歌名": "そばにいるね", "歌手": "青山テルマ feat.SoulJa", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "32K", "時長": "5:17", "發佈日期": "2008-01-23", "標籤": "#JPOP, #青山テルマ, #SoulJa", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g1zn4m7ne4"}, {"排名": 96, "封面": "https://i.ytimg.com/vi/_CV5wVHjMfQ/sddefault.jpg", "歌名": "歌に形はないけれど", "歌手": "花たん", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "36.9K", "時長": "5:31", "發佈日期": "2013-07-31", "標籤": "#COV, #花たん", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-9lkrzgyneq"}, {"排名": 97, "封面": "https://i.ytimg.com/vi/GA0MxdEYsGM/sddefault.jpg", "歌名": "This game", "歌手": "鈴木このみ", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "27.6K", "時長": "4:42", "發佈日期": "2014-05-21", "標籤": "#ANM, #鈴木このみ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynp4xyndm"}, {"排名": 98, "封面": "https://i.ytimg.com/vi/h-KuoHHjGRs/sddefault.jpg", "歌名": "瞬き", "歌手": "back number", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "49.9K", "時長": "5:25", "發佈日期": "2017-12-20", "標籤": "#JPOP, #back number", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrv394n3k"}, {"排名": 99, "封面": "https://i.ytimg.com/vi/KTZ-y85Erus/sddefault.jpg", "歌名": "だから僕は音楽を辞めた", "歌手": "ヨルシカ", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "40.7K", "時長": "4:07", "發佈日期": "2019-04-10", "標籤": "#JPOP, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1pox1jknyw"}, {"排名": 100, "封面": "https://i.ytimg.com/vi/SII-S-zCg-c/sddefault.jpg", "歌名": "高嶺の花子さん", "歌手": "back number", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "60.1K", "時長": "4:57", "發佈日期": "2013-06-26", "標籤": "#JPOP, #back number", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrvd4lr3k"}, {"排名": 101, "封面": "https://i.ytimg.com/vi/uwph0dv9E6U/sddefault.jpg", "歌名": "Sincerely", "歌手": "TRUE", "愛心數量": "1.4K", "愛心數量(數值)": "1400", "播放次數": "27.6K", "時長": "4:43", "發佈日期": "2018-01-31", "標籤": "#ANM, #TRUE", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymree0krd3"}, {"排名": 102, "封面": "https://i.ytimg.com/vi/tIhL2KHVdgE/sddefault.jpg", "歌名": "STYX HELIX", "歌手": "MYTH & ROID", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "43.6K", "時長": "4:46", "發佈日期": "2016-05-25", "標籤": "#ANM, #MYTH & ROID", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oymvxo3z"}, {"排名": 103, "封面": "https://i.ytimg.com/vi/LJkn2qqtijk/sddefault.jpg", "歌名": "Catch the Moment", "歌手": "LiSA", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "36.2K", "時長": "4:46", "發佈日期": "2017-02-15", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxedyryw"}, {"排名": 104, "封面": "https://i.ytimg.com/vi/RHBumUYrap4/hqdefault.jpg", "歌名": "おはよう。", "歌手": "Keno", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "31.1K", "時長": "4:36", "發佈日期": "2000-01-01", "標籤": "#ANM, #Keno", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ywn1zejr7l"}, {"排名": 105, "封面": "https://i.ytimg.com/vi/qiX5DI--8bg/sddefault.jpg", "歌名": "名前のない怪物", "歌手": "EGOIST", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "20.4K", "時長": "6:00", "發佈日期": "2012-12-05", "標籤": "#ANM, #EGOIST", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o716vdok"}, {"排名": 106, "封面": "https://i.ytimg.com/vi/VQ2D8rZljwU/sddefault.jpg", "歌名": "Brave Shine", "歌手": "Aimer", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "30.1K", "時長": "3:54", "發佈日期": "2015-06-03", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1pox4v4nyw"}, {"排名": 107, "封面": "https://i.ytimg.com/vi/0wPkUlXIVP4/sddefault.jpg", "歌名": "蝶々結び", "歌手": "Aimer", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "43.7K", "時長": "6:06", "發佈日期": "2016-08-17", "標籤": "#JPOP, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rjmv6r9x"}, {"排名": 108, "封面": "https://i.ytimg.com/vi/dvXRX5RJiIo/sddefault.jpg", "歌名": "エウテルペ", "歌手": "EGOIST", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "15.3K", "時長": "3:49", "發佈日期": "2011-11-30", "標籤": "#JPOP, #EGOIST", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o715ydok"}, {"排名": 109, "封面": "https://i.ytimg.com/vi/sOiMD45QGLs/sddefault.jpg", "歌名": "ギラギラ", "歌手": "Ado", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "44.5K", "時長": "4:37", "發佈日期": "2021-02-14", "標籤": "#JPOP, #Ado", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4qke7re"}, {"排名": 110, "封面": "https://i.ytimg.com/vi/pm9JyMiAU6A/sddefault.jpg", "歌名": "再会", "歌手": "LiSA×Uru", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "47.8K", "時長": "4:03", "發佈日期": "2020-11-16", "標籤": "#CM, #LiSA, #Uru", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94oglxjpr0"}, {"排名": 111, "封面": "https://i.ytimg.com/vi/61z-cqg28R8/sddefault.jpg", "歌名": "SAKURA", "歌手": "いきものがかり", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "31.5K", "時長": "6:00", "發佈日期": "2006-03-15", "標籤": "#JPOP, #いきものがかり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v14o737rkq"}, {"排名": 112, "封面": "https://i.ytimg.com/vi/d9eudCNJv1E/sddefault.jpg", "歌名": "あなただけ見つめてる", "歌手": "大黒摩季", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "34.7K", "時長": "4:44", "發佈日期": "1993-12-10", "標籤": "#ANM, #大黒摩季", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-2go284k4o3"}, {"排名": 113, "封面": "https://i.ytimg.com/vi/OIBODIPC_8Y/sddefault.jpg", "歌名": "勇者", "歌手": "YOASOBI", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "44.7K", "時長": "3:24", "發佈日期": "2023-09-29", "標籤": "#ANM, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrz5996re"}, {"排名": 114, "封面": "https://i.ytimg.com/vi/kzdJkT4kp-A/sddefault.jpg", "歌名": "ハルジオン", "歌手": "YOASOBI", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "48.5K", "時長": "3:23", "發佈日期": "2020-05-11", "標籤": "#OTH, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrz5zm7re"}, {"排名": 115, "封面": "https://i.ytimg.com/vi/MgNItWdfEIU/sddefault.jpg", "歌名": "スパークル [original ver.]", "歌手": "RADWIMPS", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "46.1K", "時長": "6:51", "發佈日期": "2016-11-23", "標籤": "#JPOP, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm90z0np"}, {"排名": 116, "封面": "https://i.ytimg.com/vi/pURmemr5LRM/sddefault.jpg", "歌名": "brave heart", "歌手": "宮崎歩", "愛心數量": "1.3K", "愛心數量(數值)": "1300", "播放次數": "32.2K", "時長": "4:12", "發佈日期": "1999-06-25", "標籤": "#ANM, #宮崎歩", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqlkmn4y"}, {"排名": 117, "封面": "https://i.ytimg.com/vi/wSTbdqo-j74/sddefault.jpg", "歌名": "星座になれたら", "歌手": "結束バンド", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "36.2K", "時長": "4:15", "發佈日期": "2022-12-25", "標籤": "#ANM, #結束バンド", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrv4vdlr3"}, {"排名": 118, "封面": "https://i.ytimg.com/vi/hkBbUf4oGfA/sddefault.jpg", "歌名": "虹", "歌手": "菅田将暉", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "61.1K", "時長": "4:32", "發佈日期": "2020-11-10", "標籤": "#ANM, #菅田将暉", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wzrv4z57r3"}, {"排名": 119, "封面": "https://i.ytimg.com/vi/JUbU6VLV6yI/sddefault.jpg", "歌名": "365日の紙飛行機", "歌手": "AKB48", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "70.6K", "時長": "5:06", "發佈日期": "2015-12-09", "標籤": "#JPOP, #AKB48", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r993erz3"}, {"排名": 120, "封面": "https://i.ytimg.com/vi/eKoD2CRr_KA/sddefault.jpg", "歌名": "表裏一体", "歌手": "ゆず", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "31.7K", "時長": "5:47", "發佈日期": "2013-12-25", "標籤": "#JPOP, #ゆず", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpvpxndm"}, {"排名": 121, "封面": "https://i.ytimg.com/vi/v5JjlzWbkNQ/sddefault.jpg", "歌名": "Get Over", "歌手": "Dream", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "25.8K", "時長": "5:13", "發佈日期": "2002-01-01", "標籤": "#ANM, #Dream", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl2mkr0"}, {"排名": 122, "封面": "https://i.ytimg.com/vi/MAn9ni-drZw/sddefault.jpg", "歌名": "if", "歌手": "西野カナ", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "24.5K", "時長": "4:53", "發佈日期": "2010-08-04", "標籤": "#ANM, #西野カナ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymre17jwnd"}, {"排名": 123, "封面": "https://i.ytimg.com/vi/7HgJIAUtICU/sddefault.jpg", "歌名": "踊り子", "歌手": "Vaundy", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "40K", "時長": "4:06", "發佈日期": "2021-11-17", "標籤": "#JPOP, #Vaundy", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3k7x7ok"}, {"排名": 124, "封面": "https://i.ytimg.com/vi/F-Cm-bmdLEY/sddefault.jpg", "歌名": "オレンジ", "歌手": "7!!", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "29.6K", "時長": "5:52", "發佈日期": "2015-02-11", "標籤": "#JPOP, #7!!", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr60lgr35"}, {"排名": 125, "封面": "https://i.ytimg.com/vi/EEMwA8KZAqg/sddefault.jpg", "歌名": "生きていたんだよな", "歌手": "あいみょん", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "42.4K", "時長": "3:22", "發佈日期": "2016-11-30", "標籤": "#JPOP, #あいみょん", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxj07nyw"}, {"排名": 126, "封面": "https://i.ytimg.com/vi/nEukZalW7Ac/sddefault.jpg", "歌名": "名前を呼ぶよ", "歌手": "ラックライフ", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "41.3K", "時長": "4:34", "發佈日期": "2016-05-11", "標籤": "#ANM, #ラックライフ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3kxvvok"}, {"排名": 127, "封面": "https://i.ytimg.com/vi/jcSVUFplqrA/sddefault.jpg", "歌名": "僕が死のうと思ったのは", "歌手": "amazarashi", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "71.4K", "時長": "6:08", "發佈日期": "2016-02-24", "標籤": "#JPOP, #amazarashi", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-2go20m0n3p"}, {"排名": 128, "封面": "https://i.ytimg.com/vi/M6gcoDN9jBc/sddefault.jpg", "歌名": "逆夢", "歌手": "King Gnu", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "47.4K", "時長": "5:20", "發佈日期": "2021-12-29", "標籤": "#ANM, #King Gnu", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm9x2znp"}, {"排名": 129, "封面": "https://i.ytimg.com/vi/9MjAJSoaoSo/sddefault.jpg", "歌名": "香水", "歌手": "瑛人", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "55.2K", "時長": "4:20", "發佈日期": "2019-04-21", "標籤": "#JPOP, #瑛人", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpv46ynd"}, {"排名": 130, "封面": "https://i.ytimg.com/vi/24K4oZjv01I/sddefault.jpg", "歌名": "aLIEz", "歌手": "SawanoHiroyuki[nZk]:mizuki", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "21.9K", "時長": "4:37", "發佈日期": "2014-09-10", "標籤": "#ANM, #SawanoHiroyuki[nZk], #mizuki", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd95q5nd"}, {"排名": 131, "封面": "https://i.ytimg.com/vi/-J9FuvPmMoI/sddefault.jpg", "歌名": "スパークル (movie ver.)", "歌手": "RADWIMPS", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "26.3K", "時長": "8:58", "發佈日期": "2016-08-24", "標籤": "#ANM, #RADWIMPS", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymre3w8od3"}, {"排名": 132, "封面": "https://i.ytimg.com/vi/FaRmThAbyOU/sddefault.jpg", "歌名": "DAN DAN 心魅かれてく", "歌手": "FIELD OF VIEW", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "28.7K", "時長": "3:36", "發佈日期": "1996-03-11", "標籤": "#ANM, #FIELD OF VIEW", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw1lkqo7"}, {"排名": 133, "封面": "https://i.ytimg.com/vi/I7ZdoZQesEA/sddefault.jpg", "歌名": "世界に一つだけの花", "歌手": "SMAP", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "15.5K", "時長": "4:37", "發佈日期": "2002-07-24", "標籤": "#JPOP, #SMAP", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4qzdxre"}, {"排名": 134, "封面": "https://i.ytimg.com/vi/D_Oyplmhhv0/sddefault.jpg", "歌名": "喜劇", "歌手": "星野源", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "37.3K", "時長": "4:36", "發佈日期": "2022-04-08", "標籤": "#ANM, #星野源", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw1x23o7"}, {"排名": 135, "封面": "https://i.ytimg.com/vi/ngm99aJh7ig/sddefault.jpg", "歌名": "LAST STARDUST", "歌手": "Aimer", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "20.4K", "時長": "5:19", "發佈日期": "2015-07-29", "標籤": "#ANM, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr6qymln3"}, {"排名": 136, "封面": "https://i.ytimg.com/vi/ytQ3Hs3WjQ4/sddefault.jpg", "歌名": "明日への手紙", "歌手": "手嶌葵", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "35.2K", "時長": "5:32", "發佈日期": "2014-07-23", "標籤": "#JPOP, #手嶌葵", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ywn1zpmer7"}, {"排名": 137, "封面": "https://i.ytimg.com/vi/09z87O1CgIw/sddefault.jpg", "歌名": "KING", "歌手": "天神子兎音", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "39.3K", "時長": "2:15", "發佈日期": "2020-09-11", "標籤": "#COV, #天神子兎音", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3kgjvok"}, {"排名": 138, "封面": "https://i.ytimg.com/vi/4xuP6Wnkqpc/sddefault.jpg", "歌名": "Time after time～花舞う街で～", "歌手": "倉木麻衣", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "29.7K", "時長": "4:11", "發佈日期": "2003-03-05", "標籤": "#ANM, #倉木麻衣", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ywn137jo7l"}, {"排名": 139, "封面": "https://i.ytimg.com/vi/jbHG7fsZVkM/sddefault.jpg", "歌名": "めざせポケモンマスター", "歌手": "松本梨香", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "19.1K", "時長": "4:13", "發佈日期": "1997-06-28", "標籤": "#ANM, #松本梨香", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd9k86nd"}, {"排名": 140, "封面": "https://i.ytimg.com/vi/eWeSqrRk-gs/sddefault.jpg", "歌名": "メリーゴーランド", "歌手": "優里", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "50.2K", "時長": "5:14", "發佈日期": "2022-12-22", "標籤": "#ANM, #優里", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm9g65np"}, {"排名": 141, "封面": "https://i.ytimg.com/vi/0q6c0AKDKU4/sddefault.jpg", "歌名": "ミカヅキ", "歌手": "さユり", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "29K", "時長": "4:30", "發佈日期": "2015-08-26", "標籤": "#ANM, #さユり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r00vgrv8"}, {"排名": 142, "封面": "https://i.ytimg.com/vi/vVGa8I0Atcg/sddefault.jpg", "歌名": "空色デイズ", "歌手": "中川翔子", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "22.9K", "時長": "4:22", "發佈日期": "2007-06-27", "標籤": "#ANM, #中川翔子", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-evr81ddnm5"}, {"排名": 143, "封面": "https://i.ytimg.com/vi/bt8wNQJaKAk/sddefault.jpg", "歌名": "I LOVE...", "歌手": "Official髭男dism", "愛心數量": "1.2K", "愛心數量(數值)": "1200", "播放次數": "58.6K", "時長": "4:49", "發佈日期": "2020-02-12", "標籤": "#JPOP, #Official髭男dism", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oy5kzdn3"}, {"排名": 144, "封面": "https://i.ytimg.com/vi/a3FgmTfvJhA/sddefault.jpg", "歌名": "可愛くてごめん", "歌手": "かぴ", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "45.5K", "時長": "3:42", "發佈日期": "2022-08-28", "標籤": "#JPOP, #HoneyWorks, #かぴ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd9mp5nd"}, {"排名": 145, "封面": "https://i.ytimg.com/vi/9qhJ1vhTH7A/sddefault.jpg", "歌名": "君がくれた夏", "歌手": "家入レオ", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "38.9K", "時長": "4:40", "發佈日期": "2015-08-19", "標籤": "#JPOP, #家入レオ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd96q5nd"}, {"排名": 146, "封面": "https://i.ytimg.com/vi/1zwaZkOXXqw/sddefault.jpg", "歌名": "DADDY! DADDY! DO! feat. 鈴木愛理", "歌手": "鈴木雅之", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "24.3K", "時長": "4:15", "發佈日期": "2020-04-15", "標籤": "#ANM, #鈴木雅之, #鈴木愛理", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okwz4voq"}, {"排名": 147, "封面": "https://i.ytimg.com/vi/-XgOWOS9btU/sddefault.jpg", "歌名": "小さな恋のうた", "歌手": "新垣結衣と少年少女ガッキー団", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "28.2K", "時長": "5:25", "發佈日期": "2010-09-22", "標籤": "#JPOP, #新垣結衣", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-wdr6q849n3"}, {"排名": 148, "封面": "https://i.ytimg.com/vi/aHIR33pOUv0/sddefault.jpg", "歌名": "Everything", "歌手": "MISIA", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "31K", "時長": "7:09", "發佈日期": "2000-10-25", "標籤": "#JPOP, #MISIA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-260rmjzrpz"}, {"排名": 149, "封面": "https://i.ytimg.com/vi/r93rVW--5ZU/sddefault.jpg", "歌名": "晩餐歌", "歌手": "tuki.×優里", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "50.2K", "時長": "3:51", "發佈日期": "2023-11-06", "標籤": "#JPOP, #tuki., #優里", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r05g6dnv"}, {"排名": 150, "封面": "https://i.ytimg.com/vi/40dJS_LC6S8/sddefault.jpg", "歌名": "泥中に咲く", "歌手": "ウォルピスカーター", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "32.1K", "時長": "4:51", "發佈日期": "2018-12-26", "標籤": "#JPOP, #ウォルピスカーター", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n31jzrkw"}, {"排名": 151, "封面": "https://i.ytimg.com/vi/kagoEGKHZvU/sddefault.jpg", "歌名": "NIGHT DANCER", "歌手": "imase", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "37.7K", "時長": "3:31", "發佈日期": "2022-08-19", "標籤": "#JPOP, #imase", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd9m46nd"}, {"排名": 152, "封面": "https://i.ytimg.com/vi/Rwzy6Qt8gq8/sddefault.jpg", "歌名": "花の塔", "歌手": "さユり", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "29.6K", "時長": "4:36", "發佈日期": "2022-07-03", "標籤": "#ANM, #さユり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9mj69oz"}, {"排名": 153, "封面": "https://i.ytimg.com/vi/TXpGWhdwXuo/sddefault.jpg", "歌名": "僕らの手には何もないけど、", "歌手": "RAM WIRE", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "32.6K", "時長": "4:26", "發佈日期": "2015-05-27", "標籤": "#JPOP, #RAM WIRE", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4kdmre4"}, {"排名": 154, "封面": "https://i.ytimg.com/vi/5CSNv9MNEC4/sddefault.jpg", "歌名": "Don't say“lazy”", "歌手": "放課後ティータイム", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "11.8K", "時長": "4:24", "發佈日期": "2009-04-22", "標籤": "#ANM, #放課後ティータイム", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvol9mg4o2"}, {"排名": 155, "封面": "https://i.ytimg.com/vi/GB3DN7B4mx4/sddefault.jpg", "歌名": "レイン", "歌手": "シド", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "14.2K", "時長": "4:20", "發佈日期": "2010-06-02", "標籤": "#ANM, #シド", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxq24kry"}, {"排名": 156, "封面": "https://i.ytimg.com/vi/Lq2-HHP04jM/sddefault.jpg", "歌名": "変わらないもの", "歌手": "奥華子", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "11K", "時長": "4:46", "發佈日期": "2006-07-12", "標籤": "#ANM, #奥華子", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94oglzv5r0"}, {"排名": 157, "封面": "https://i.ytimg.com/vi/NCPH9JUFESA/sddefault.jpg", "歌名": "負けないで", "歌手": "ZARD", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "63.2K", "時長": "4:40", "發佈日期": "1993-01-27", "標籤": "#JPOP, #ZARD", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm98pdnp"}, {"排名": 158, "封面": "https://i.ytimg.com/vi/VhdxHln7TOU/sddefault.jpg", "歌名": "Secret of my heart", "歌手": "倉木麻衣", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "15.5K", "時長": "4:27", "發佈日期": "2000-04-26", "標籤": "#ANM, #倉木麻衣", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oql2qqn4"}, {"排名": 159, "封面": "https://i.ytimg.com/vi/wM4laths4-Y/sddefault.jpg", "歌名": "世界は恋に落ちている", "歌手": "CHiCO with HoneyWorks", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "17.9K", "時長": "5:21", "發佈日期": "2014-08-06", "標籤": "#ANM, #HoneyWorks, #CHiCO", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymre1j6gnd"}, {"排名": 160, "封面": "https://i.ytimg.com/vi/M2cckDmNLMI/sddefault.jpg", "歌名": "KICK BACK", "歌手": "米津玄師", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "37K", "時長": "3:48", "發佈日期": "2022-10-12", "標籤": "#ANM, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrz53y6re"}, {"排名": 161, "封面": "https://i.ytimg.com/vi/nhOhFOoURnE/sddefault.jpg", "歌名": "三原色", "歌手": "YOASOBI", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "43.7K", "時長": "3:47", "發佈日期": "2021-07-02", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrd9jwdnd"}, {"排名": 162, "封面": "https://i.ytimg.com/vi/a6nmtJAC4NM/sddefault.jpg", "歌名": "My Dearest", "歌手": "supercell", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "18K", "時長": "5:54", "發佈日期": "2011-11-23", "標籤": "#ANM, #supercell", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-xqrdx6vnd4"}, {"排名": 163, "封面": "https://i.ytimg.com/vi/H08YWE4CIFQ/sddefault.jpg", "歌名": "Overdose", "歌手": "なとり", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "30.5K", "時長": "3:14", "發佈日期": "2022-09-07", "標籤": "#JPOP, #なとり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpv6y9nd"}, {"排名": 164, "封面": "https://i.ytimg.com/vi/KMTo2LmixqQ/sddefault.jpg", "歌名": "summertime", "歌手": "cinnamons × evening cinema", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "36.2K", "時長": "4:12", "發佈日期": "2018-12-12", "標籤": "#JPOP, #cinnamons, #evening cinema", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okw5ypoq"}, {"排名": 165, "封面": "https://i.ytimg.com/vi/ptnYBctoexk/sddefault.jpg", "歌名": "馬と鹿", "歌手": "米津玄師", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "44.7K", "時長": "4:45", "發佈日期": "2019-09-11", "標籤": "#JPOP, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvol994do2"}, {"排名": 166, "封面": "https://i.ytimg.com/vi/OcNSFV5Io0Q/sddefault.jpg", "歌名": "oath sign", "歌手": "LiSA", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "22.9K", "時長": "4:11", "發佈日期": "2011-11-23", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3klkokw"}, {"排名": 167, "封面": "https://i.ytimg.com/vi/Woorod1gJ_w/sddefault.jpg", "歌名": "小さな恋のうた", "歌手": "天月", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "34.4K", "時長": "4:40", "發佈日期": "", "標籤": "#OTH, #天月", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvolkjkr2w"}, {"排名": 168, "封面": "https://i.ytimg.com/vi/1FliVTcX8bQ/sddefault.jpg", "歌名": "新時代", "歌手": "Ado", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "34.3K", "時長": "3:57", "發佈日期": "2022-08-10", "標籤": "#ANM, #Ado", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogl4kpr0"}, {"排名": 169, "封面": "https://i.ytimg.com/vi/8L5cQlXMpeY/sddefault.jpg", "歌名": "「僕は...」", "歌手": "あたらよ", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "29K", "時長": "3:58", "發佈日期": "2024-01-08", "標籤": "#ANM, #あたらよ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogly0er0"}, {"排名": 170, "封面": "https://i.ytimg.com/vi/OZ3UuZdUHZc/sddefault.jpg", "歌名": "未来へ", "歌手": "Kiroro", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "27.8K", "時長": "5:30", "發佈日期": "1998-06-24", "標籤": "#JPOP, #Kiroro", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r01q8ov8"}, {"排名": 171, "封面": "https://i.ytimg.com/vi/qIoDWTF0qSo/hqdefault.jpg", "歌名": "深い森", "歌手": "Do As Infinity", "愛心數量": "1.1K", "愛心數量(數值)": "1100", "播放次數": "20.1K", "時長": "4:17", "發佈日期": "2001-06-27", "標籤": "#ANM, #Do As Infinity", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lkrz02yoeq"}, {"排名": 172, "封面": "https://i.ytimg.com/vi/ZhMakZuBU-o/sddefault.jpg", "歌名": "One more time, One more chance", "歌手": "山崎まさよし", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "27.7K", "時長": "5:33", "發佈日期": "1997-01-22", "標籤": "#ANM, #山崎まさよし", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-vxn5w08n9e"}, {"排名": 173, "封面": "https://i.ytimg.com/vi/QFryFamyq4U/sddefault.jpg", "歌名": "星屑ビーナス", "歌手": "Aimer", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "28.5K", "時長": "4:13", "發佈日期": "2012-08-15", "標籤": "#JPOP, #Aimer", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rmwx0opz"}, {"排名": 174, "封面": "https://i.ytimg.com/vi/6HYHdkEYdQE/sddefault.jpg", "歌名": "いけないボーダーライン", "歌手": "ワルキューレ", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "10.9K", "時長": "4:43", "發佈日期": "2016-05-11", "標籤": "#ANM, #ワルキューレ, #JUNNA, #鈴木みのり, #安野希世乃, #西田望見, #東山奈央", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-ymre1z36nd"}, {"排名": 175, "封面": "https://i.ytimg.com/vi/Hh9yZWeTmVM/sddefault.jpg", "歌名": "The Beginning", "歌手": "ONE OK ROCK", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "30.9K", "時長": "5:14", "發佈日期": "2012-08-22", "標籤": "#JPOP, #ONE OK ROCK", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw15qo7x"}, {"排名": 176, "封面": "https://i.ytimg.com/vi/ERLEeGVWYxg/sddefault.jpg", "歌名": "シュガーソングとビターステップ", "歌手": "UNISON SQUARE GARDEN", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "25.8K", "時長": "4:23", "發佈日期": "2015-05-20", "標籤": "#ANM, #UNISON SQUARE GARDEN", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94ogwykn0j"}, {"排名": 177, "封面": "https://i.ytimg.com/vi/yo-0lPwPnbo/sddefault.jpg", "歌名": "会いたくて 会いたくて", "歌手": "西野カナ", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "28.1K", "時長": "4:44", "發佈日期": "2010-05-19", "標籤": "#JPOP, #西野カナ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpvd0ndm"}, {"排名": 178, "封面": "https://i.ytimg.com/vi/AzPWGoHvJsM/sddefault.jpg", "歌名": "プラチナ", "歌手": "坂本真綾", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "11.8K", "時長": "4:11", "發佈日期": "1999-10-21", "標籤": "#ANM, #坂本真綾", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm9zwznp"}, {"排名": 179, "封面": "https://i.ytimg.com/vi/ARwVe1MYAUA/sddefault.jpg", "歌名": "君はロックを聴かない", "歌手": "あいみょん", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "35.9K", "時長": "4:27", "發佈日期": "2017-08-02", "標籤": "#JPOP, #あいみょん", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y7okxelnq9"}, {"排名": 180, "封面": "https://i.ytimg.com/vi/DuMqFknYHBs/sddefault.jpg", "歌名": "イエスタデイ", "歌手": "Official髭男dism", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "35K", "時長": "5:01", "發佈日期": "2019-10-09", "標籤": "#JPOP, #Official髭男dism", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rj99wmn9"}, {"排名": 181, "封面": "https://i.ytimg.com/vi/XpM2N1y-FD8/sddefault.jpg", "歌名": "いつも何度でも", "歌手": "木村弓", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "16.2K", "時長": "3:42", "發佈日期": "2001-07-18", "標籤": "#ANM, #木村弓", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-14o71z84ok"}, {"排名": 182, "封面": "https://i.ytimg.com/vi/D3IDK_R1LTg/sddefault.jpg", "歌名": "Every Heart -ミンナノキモチ-", "歌手": "BoA", "愛心數量": "1K", "愛心數量(數值)": "1000", "播放次數": "16.9K", "時長": "4:39", "發佈日期": "2002-03-13", "標籤": "#JPOP, #BoA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oqpgqr4y"}, {"排名": 183, "封面": "https://i.ytimg.com/vi/pdGHyiPH8ig/sddefault.jpg", "歌名": "終わりの世界から", "歌手": "麻枝准×やなぎなぎ", "愛心數量": "987", "愛心數量(數值)": "987", "播放次數": "16.6K", "時長": "5:58", "發佈日期": "2012-04-25", "標籤": "#ANM, #やなぎなぎ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lwzrv3wn3k"}, {"排名": 184, "封面": "https://i.ytimg.com/vi/Sw1Flgub9s8/sddefault.jpg", "歌名": "春泥棒", "歌手": "ヨルシカ", "愛心數量": "983", "愛心數量(數值)": "983", "播放次數": "33.3K", "時長": "5:00", "發佈日期": "2021-01-09", "標籤": "#JPOP, #ヨルシカ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-94oglm00r0"}, {"排名": 185, "封面": "https://i.ytimg.com/vi/EXxaBXKjl6Q/sddefault.jpg", "歌名": "HANABI", "歌手": "Mr.Children", "愛心數量": "983", "愛心數量(數值)": "983", "播放次數": "44.5K", "時長": "5:58", "發佈日期": "2008-09-03", "標籤": "#JPOP, #Mr.Children", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e1pox4ynyw"}, {"排名": 186, "封面": "https://i.ytimg.com/vi/ScWlFcYn_FI/sddefault.jpg", "歌名": "革命道中", "歌手": "アイナ・ジ・エンド", "愛心數量": "982", "愛心數量(數值)": "982", "播放次數": "35.9K", "時長": "3:21", "發佈日期": "2025-07-02", "標籤": "#ANM, #アイナ・ジ・エンド", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-dvol96qko2"}, {"排名": 187, "封面": "https://i.ytimg.com/vi/vd3IlOjSUGQ/sddefault.jpg", "歌名": "ハルカ", "歌手": "YOASOBI", "愛心數量": "978", "愛心數量(數值)": "978", "播放次數": "39.6K", "時長": "4:05", "發佈日期": "2020-12-18", "標籤": "#JPOP, #YOASOBI", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-lvnw13xqo7"}, {"排名": 188, "封面": "https://i.ytimg.com/vi/iqEr3P78fz8/sddefault.jpg", "歌名": "水平線", "歌手": "back number", "愛心數量": "977", "愛心數量(數值)": "977", "播放次數": "39.8K", "時長": "5:13", "發佈日期": "2021-08-13", "標籤": "#JPOP, #back number", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1poxq5wxry"}, {"排名": 189, "封面": "https://i.ytimg.com/vi/XQWWS8f6X9I/sddefault.jpg", "歌名": "一番の宝物", "歌手": "Girls Dead Monster STARRING LiSA", "愛心數量": "972", "愛心數量(數值)": "972", "播放次數": "15.2K", "時長": "6:09", "發佈日期": "2010-12-08", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-e4oyk6dn3z"}, {"排名": 190, "封面": "https://i.ytimg.com/vi/Uh6dkL1M9DM/sddefault.jpg", "歌名": "Flamingo", "歌手": "米津玄師", "愛心數量": "971", "愛心數量(數值)": "971", "播放次數": "35.3K", "時長": "3:38", "發佈日期": "2018-10-31", "標籤": "#JPOP, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-v7n3wk3okw"}, {"排名": 191, "封面": "https://i.ytimg.com/vi/M1ajQuujwKk/sddefault.jpg", "歌名": "それは小さな光のような", "歌手": "さユり", "愛心數量": "971", "愛心數量(數值)": "971", "播放次數": "22K", "時長": "4:42", "發佈日期": "2016-02-24", "標籤": "#ANM, #さユり", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-1zn4lkjoe4"}, {"排名": 192, "封面": "https://i.ytimg.com/vi/Evy1FWBv9Hc/sddefault.jpg", "歌名": "鳥の詩", "歌手": "Lia", "愛心數量": "970", "愛心數量(數值)": "970", "播放次數": "14.4K", "時長": "6:05", "發佈日期": "2000-09-08", "標籤": "#ANM, #Lia", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r03q0rv8"}, {"排名": 193, "封面": "https://i.ytimg.com/vi/k9Eewd8TEWE/sddefault.jpg", "歌名": "フォニイ", "歌手": "町田ちま", "愛心數量": "969", "愛心數量(數值)": "969", "播放次數": "35K", "時長": "3:09", "發佈日期": "2021-08-05", "標籤": "#COV, #町田ちま", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-pynpvy8ynd"}, {"排名": 194, "封面": "https://i.ytimg.com/vi/5B8isYtE_Yw/sddefault.jpg", "歌名": "季節は次々死んでいく", "歌手": "amazarashi", "愛心數量": "967", "愛心數量(數值)": "967", "播放次數": "30.1K", "時長": "5:40", "發佈日期": "2015-02-18", "標籤": "#ANM, #amazarashi", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oql244n4"}, {"排名": 195, "封面": "https://i.ytimg.com/vi/T6kVa48UbUw/sddefault.jpg", "歌名": "深海少女", "歌手": "初音ミク", "愛心數量": "966", "愛心數量(數值)": "966", "播放次數": "17.9K", "時長": "3:42", "發佈日期": "2022-12-16", "標籤": "#VOC, #初音ミク", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm9lpznp"}, {"排名": 196, "封面": "https://i.ytimg.com/vi/LmZD-TU96q4/sddefault.jpg", "歌名": "IRIS OUT", "歌手": "米津玄師", "愛心數量": "965", "愛心數量(數值)": "965", "播放次數": "42.9K", "時長": "2:34", "發佈日期": "2025-09-15", "標籤": "#ANM, #米津玄師", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-g9r057q2nv"}, {"排名": 197, "封面": "https://i.ytimg.com/vi/4vvvL8y9VHM/sddefault.jpg", "歌名": "unlasting", "歌手": "LiSA", "愛心數量": "965", "愛心數量(數值)": "965", "播放次數": "22.9K", "時長": "4:54", "發佈日期": "2019-12-11", "標籤": "#ANM, #LiSA", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-y8rj99e1n9"}, {"排名": 198, "封面": "https://i.ytimg.com/vi/Z6DZP3fwVmg/sddefault.jpg", "歌名": "君をのせて", "歌手": "井上あずみ", "愛心數量": "959", "愛心數量(數值)": "959", "播放次數": "12.1K", "時長": "3:25", "發佈日期": "2000-04-26", "標籤": "#ANM, #井上あずみ", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-72r9mz54oz"}, {"排名": 199, "封面": "https://i.ytimg.com/vi/GJI4Gv7NbmE/sddefault.jpg", "歌名": "秒針を噛む", "歌手": "ずっと真夜中でいいのに。", "愛心數量": "953", "愛心數量(數值)": "953", "播放次數": "26.2K", "時長": "4:33", "發佈日期": "2018-11-14", "標籤": "#JPOP, #ずっと真夜中でいいのに。", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-60rm7p3rpz"}, {"排名": 200, "封面": "https://i.ytimg.com/vi/fGGTf044UPI/sddefault.jpg", "歌名": "ライオン", "歌手": "中島愛、May'n", "愛心數量": "951", "愛心數量(數值)": "951", "播放次數": "16.3K", "時長": "5:04", "發佈日期": "2008-08-20", "標籤": "#ANM, #中島愛, #May'n", "歌曲連結": "https://www.marumaru-x.com/japanese-song/play-q9oq06mn4y"}];
+        let songs = [];
+
+        // Format numbers for dashboard (e.g. 9.5K to 9500)
+        function convertToNumber(valStr) {
+            if (!valStr) return 0;
+            valStr = String(valStr).trim().toUpperCase();
+            if (!valStr || valStr === '0') return 0;
+            if (valStr.includes('K')) {
+                return parseFloat(valStr.replace('K', '')) * 1000;
+            }
+            if (valStr.includes('M')) {
+                return parseFloat(valStr.replace('M', '')) * 1000000;
+            }
+            return parseFloat(valStr) || 0;
+        }
+
+        // Check if running from web server or local filesystem
+        const isLocalFile = window.location.protocol === 'file:';
+
+        async function initApp() {
+            const refreshBtn = document.getElementById('btn-refresh');
+            if (isLocalFile) {
+                console.log("Running in static file preview mode.");
+                songs = staticSongs;
+                document.getElementById('update-time').textContent = "資料更新時間: 2026-06-30 16:38:54 (靜態檔案預覽)";
+                if (refreshBtn) {
+                    refreshBtn.title = "靜態預覽模式下不可用，請啟動 FastAPI 伺服器";
+                    refreshBtn.style.opacity = "0.5";
+                    refreshBtn.addEventListener('click', () => {
+                        alert("當前為靜態預覽模式。要重新爬取資料，請啟動 FastAPI 伺服器並透過 http://localhost:8000 存取！");
+                    });
+                }
+                calculateAndDisplayStats(songs);
+                setupTagFilterDropdown();
+                renderSongs();
+            } else {
+                console.log("Running in FastAPI dynamic mode.");
+                document.getElementById('update-time').textContent = "資料更新時間: API 即時數據";
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', triggerScrapeAPI);
+                }
+                await fetchSongsFromAPI();
+                await fetchStatsFromAPI();
+                setupTagFilterDropdown();
+            }
+            // Initialize Sakura Animation
+            initSakura();
+            // Initialize Chatbot
+            initChat();
+        }
+
+        // Fetch all songs from API
+        async function fetchSongsFromAPI() {
+            try {
+                const response = await fetch('/api/songs');
+                if (response.ok) {
+                    songs = await response.json();
+                    renderSongs();
+                } else {
+                    console.error("Failed to fetch songs from API.");
+                }
+            } catch (e) {
+                console.error("Error fetching songs from API:", e);
+            }
+        }
+
+        // Fetch stats from API
+        async function fetchStatsFromAPI() {
+            try {
+                const response = await fetch('/api/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    const totalLikesVal = stats.total_likes;
+                    const totalPlaysVal = stats.total_plays;
+                    
+                    document.getElementById('total-likes').textContent = totalLikesVal >= 1000 ? (totalLikesVal / 1000).toFixed(1) + 'K' : totalLikesVal;
+                    document.getElementById('total-plays').textContent = totalPlaysVal >= 1000000 ? (totalPlaysVal / 1000000).toFixed(1) + 'M' : (totalPlaysVal >= 1000 ? (totalPlaysVal / 1000).toFixed(1) + 'K' : totalPlaysVal);
+                    const topSingerEl = document.getElementById('top-singer');
+                    if (topSingerEl) topSingerEl.textContent = stats.top_singer;
+                }
+            } catch (e) {
+                console.error("Error fetching stats:", e);
+            }
+        }
+
+        // Calculate and display stats locally (static mode fallback)
+        function calculateAndDisplayStats(songList) {
+            let totalLikesVal = 0;
+            let totalPlaysVal = 0;
+            const singerCounts = {};
+
+            songList.forEach(song => {
+                totalLikesVal += convertToNumber(song.愛心數量);
+                totalPlaysVal += convertToNumber(song.播放次數);
+                if (song.歌手) {
+                    singerCounts[song.歌手] = (singerCounts[song.歌手] || 0) + 1;
+                }
+            });
+
+            let topSinger = '--';
+            let maxCount = 0;
+            for (const [singer, count] of Object.entries(singerCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topSinger = singer + ' (' + count + '首)';
+                }
+            }
+
+            document.getElementById('total-likes').textContent = totalLikesVal >= 1000 ? (totalLikesVal / 1000).toFixed(1) + 'K' : totalLikesVal;
+            document.getElementById('total-plays').textContent = totalPlaysVal >= 1000000 ? (totalPlaysVal / 1000000).toFixed(1) + 'M' : (totalPlaysVal >= 1000 ? (totalPlaysVal / 1000).toFixed(1) + 'K' : totalPlaysVal);
+            const topSingerEl = document.getElementById('top-singer');
+            if (topSingerEl) topSingerEl.textContent = topSinger;
+        }
+
+        // Setup dropdown
+        function setupTagFilterDropdown() {
+            const allTagsSet = new Set();
+            songs.forEach(song => {
+                if (song.標籤) {
+                    song.標籤.split(',').forEach(t => {
+                        const tag = t.trim();
+                        if (tag) allTagsSet.add(tag);
+                    });
+                }
+            });
+            const filterTagSelect = document.getElementById('filter-tag');
+            filterTagSelect.innerHTML = '<option value="all">所有標籤</option>';
+            Array.from(allTagsSet).sort().forEach(tag => {
+                const opt = document.createElement('option');
+                opt.value = tag;
+                opt.textContent = tag;
+                filterTagSelect.appendChild(opt);
+            });
+        }
+
+        // Trigger Scrape through FastAPI
+        let checkStatusInterval = null;
+        async function triggerScrapeAPI() {
+            try {
+                const response = await fetch('/api/scrape', { method: 'POST' });
+                if (response.ok) {
+                    showLoadingOverlay("正在啟動背景爬蟲程式...");
+                    startCheckingScrapeStatus();
+                } else {
+                    const err = await response.json();
+                    alert("啟動爬蟲失敗: " + (err.message || "未知原因"));
+                }
+            } catch (e) {
+                alert("連接 API 失敗，請確認 FastAPI 伺服器正在運行。");
+            }
+        }
+
+        function showLoadingOverlay(text) {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            document.getElementById('loading-text').textContent = text;
+        }
+
+        function hideLoadingOverlay() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function startCheckingScrapeStatus() {
+            if (checkStatusInterval) clearInterval(checkStatusInterval);
+            checkStatusInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/scrape/status');
+                    if (response.ok) {
+                        const statusData = await response.json();
+                        if (statusData.status === 'running') {
+                            showLoadingOverlay("正在背景重新爬取最新歌曲排行，請稍候...");
+                        } else if (statusData.status === 'completed') {
+                            clearInterval(checkStatusInterval);
+                            showLoadingOverlay("資料更新完成！正在重新載入數據...");
+                            setTimeout(async () => {
+                                await fetchSongsFromAPI();
+                                await fetchStatsFromAPI();
+                                setupTagFilterDropdown();
+                                hideLoadingOverlay();
+                            }, 1000);
+                        } else if (statusData.status === 'failed') {
+                            clearInterval(checkStatusInterval);
+                            hideLoadingOverlay();
+                            alert("爬蟲執行失敗: " + (statusData.error || "未知錯誤"));
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error checking scrape status:", e);
+                }
+            }, 2000);
+        }
+
+        // UI elements
+        const searchInput = document.getElementById('search');
+        const sortBySelect = document.getElementById('sort-by');
+        const filterTag = document.getElementById('filter-tag');
+        const btnGrid = document.getElementById('btn-grid');
+        const btnTable = document.getElementById('btn-table');
+        const songsGrid = document.getElementById('songs-grid');
+        const tableContainer = document.getElementById('table-container');
+        const songsTableBody = document.getElementById('songs-table-body');
+        const noResults = document.getElementById('no-results');
+
+        let currentLayout = 'grid';
+
+        // Layout Toggle Actions
+        btnGrid.addEventListener('click', () => {
+            currentLayout = 'grid';
+            btnGrid.classList.add('active');
+            btnTable.classList.remove('active');
+            songsGrid.style.display = 'grid';
+            tableContainer.style.display = 'none';
+            renderSongs();
+        });
+
+        btnTable.addEventListener('click', () => {
+            currentLayout = 'table';
+            btnTable.classList.add('active');
+            btnGrid.classList.remove('active');
+            songsGrid.style.display = 'none';
+            tableContainer.style.display = 'block';
+            renderSongs();
+        });
+
+        // Event listeners for sorting & filtering
+        searchInput.addEventListener('input', renderSongs);
+        sortBySelect.addEventListener('change', renderSongs);
+        filterTag.addEventListener('change', renderSongs);
+
+        // Core Render Function
+        function renderSongs() {
+            const searchQuery = searchInput.value.toLowerCase().trim();
+            const sortBy = sortBySelect.value;
+            const tagFilter = filterTag.value;
+
+            // 1. Filter
+            let filteredSongs = songs.filter(song => {
+                const matchSearch = song.歌名.toLowerCase().includes(searchQuery) || 
+                                    song.歌手.toLowerCase().includes(searchQuery) ||
+                                    (song.標籤 && song.標籤.toLowerCase().includes(searchQuery));
+                
+                const matchTag = tagFilter === 'all' || 
+                                 (song.標籤 && song.標籤.split(',').map(t => t.trim()).includes(tagFilter));
+
+                return matchSearch && matchTag;
+            });
+
+            // 2. Sort
+            filteredSongs.sort((a, b) => {
+                if (sortBy === 'rank') {
+                    return a.排名 - b.排名;
+                } else if (sortBy === 'likes-desc') {
+                    return convertToNumber(b.愛心數量) - convertToNumber(a.愛心數量);
+                } else if (sortBy === 'plays-desc') {
+                    return convertToNumber(b.播放次數) - convertToNumber(a.播放次數);
+                } else if (sortBy === 'date-desc') {
+                    return new Date(b.發佈日期 || '1970-01-01') - new Date(a.發佈日期 || '1970-01-01');
+                } else if (sortBy === 'duration-desc') {
+                    const getSecs = (str) => {
+                        if (!str) return 0;
+                        const pts = str.split(':').map(Number);
+                        return pts.length === 2 ? pts[0] * 60 + pts[1] : 0;
+                    };
+                    return getSecs(b.時長) - getSecs(a.時長);
+                }
+                return 0;
+            });
+
+            // 3. Render Views
+            if (filteredSongs.length === 0) {
+                noResults.style.display = 'block';
+                songsGrid.innerHTML = '';
+                songsTableBody.innerHTML = '';
+                return;
+            }
+            noResults.style.display = 'none';
+
+            if (currentLayout === 'grid') {
+                songsGrid.innerHTML = filteredSongs.map(song => {
+                    const tagsHtml = song.標籤 ? song.標籤.split(',').map(t => `<a href="#" class="tag-badge" onclick="filterByTag('${t.trim()}'); return false;">${t.trim()}</a>`).join('') : '';
+                    return `
+                        <div class="song-card">
+                            <div class="rank-badge">#${song.排名}</div>
+                            <div class="card-img-wrap" onclick="openLyricsModal(${song.排名})" style="cursor: pointer;">
+                                <img src="${song.封面 || 'https://via.placeholder.com/320x180?text=No+Thumbnail'}" alt="${song.歌名}" class="card-img" loading="lazy">
+                                <div class="duration-badge">${song.時長}</div>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="song-title"><a href="#" onclick="openLyricsModal(${song.排名}); return false;">${song.歌名}</a></h3>
+                                <p class="song-singer">${song.歌手}</p>
+                                <div class="card-stats">
+                                    <span class="card-stat-item likes"><i class="bi bi-heart-fill"></i> ${song.愛心數量}</span>
+                                    <span class="card-stat-item plays"><i class="bi bi-play-circle-fill"></i> ${song.播放次數}</span>
+                                    <span class="card-stat-item date"><i class="bi bi-calendar3"></i> ${song.發佈日期}</span>
+                                </div>
+                                <div class="card-tags">${tagsHtml}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                songsTableBody.innerHTML = filteredSongs.map(song => {
+                    const tagsHtml = song.標籤 ? song.標籤.split(',').map(t => `<a href="#" class="tag-badge" onclick="filterByTag('${t.trim()}'); return false;">${t.trim()}</a>`).join(' ') : '';
+                    return `
+                        <tr>
+                            <td class="table-rank">#${song.排名}</td>
+                            <td><img src="${song.封面 || 'https://via.placeholder.com/60x34?text=No+Thumb'}" class="table-thumb" alt="封面" loading="lazy" onclick="openLyricsModal(${song.排名})" style="cursor: pointer;"></td>
+                            <td class="table-title"><a href="#" onclick="openLyricsModal(${song.排名}); return false;">${song.歌名}</a></td>
+                            <td>${song.歌手}</td>
+                            <td style="color: #ff4081; font-weight: 500;"><i class="bi bi-heart-fill"></i> ${song.愛心數量}</td>
+                            <td style="color: #00e5ff;"><i class="bi bi-play-circle-fill"></i> ${song.播放次數}</td>
+                            <td>${song.時長}</td>
+                            <td style="font-size: 0.85rem; color: var(--text-secondary);">${song.發佈日期}</td>
+                            <td>${tagsHtml}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Helper to trigger filtering from tags
+        window.filterByTag = function(tag) {
+            filterTag.value = tag;
+            renderSongs();
+        };
+
+        // Modal functions
+        async function openLyricsModal(rank) {
+            const song = songs.find(s => s.排名 === rank);
+            if (!song) return;
+
+            const modal = document.getElementById('lyrics-modal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('modal-cover').src = song.封面 || 'https://via.placeholder.com/320x180?text=No+Thumbnail';
+            document.getElementById('modal-rank').textContent = `#${song.排名}`;
+            document.getElementById('modal-title').textContent = song.歌名;
+            document.getElementById('modal-singer').textContent = song.歌手;
+            document.getElementById('modal-likes').textContent = song.愛心數量;
+            document.getElementById('modal-plays').textContent = song.播放次數;
+            document.getElementById('modal-duration').textContent = song.時長;
+            document.getElementById('modal-date').textContent = song.發佈日期 || '未知';
+
+            const tagsContainer = document.getElementById('modal-tags');
+            tagsContainer.innerHTML = '';
+            if (song.標籤) {
+                song.標籤.split(',').forEach(tag => {
+                    const cleanTag = tag.trim();
+                    if (cleanTag) {
+                        const tagEl = document.createElement('span');
+                        tagEl.className = 'tag-badge';
+                        tagEl.style.cursor = 'default';
+                        tagEl.textContent = cleanTag;
+                        tagsContainer.appendChild(tagEl);
+                    }
+                });
+            }
+
+            document.getElementById('modal-external-link').href = song.歌曲連結;
+
+            const loadingEl = document.getElementById('modal-lyrics-loading');
+            const errorEl = document.getElementById('modal-lyrics-error');
+            const containerEl = document.getElementById('modal-lyrics-container');
+
+            loadingEl.style.display = 'flex';
+            errorEl.style.display = 'none';
+            containerEl.style.display = 'none';
+            containerEl.innerHTML = '';
+
+            try {
+                let lyrics = null;
+                if (isLocalFile) {
+                    try {
+                        const res = await fetch(`lyrics/${rank}.json`);
+                        if (res.ok) {
+                            lyrics = await res.json();
+                        }
+                    } catch (e) {
+                        console.warn("Relative fetch failed, attempting fallback.");
+                    }
+                } else {
+                    const res = await fetch(`/api/lyrics/${rank}`);
+                    if (res.ok) {
+                        lyrics = await res.json();
+                    }
+                }
+
+                if (!lyrics && isLocalFile) {
+                    try {
+                        const res = await fetch(`http://127.0.0.1:8000/api/lyrics/${rank}`);
+                        if (res.ok) {
+                            lyrics = await res.json();
+                        }
+                    } catch (e) {
+                        console.error("FastAPI fallback fetch failed:", e);
+                    }
+                }
+
+                if (!lyrics || lyrics.length === 0) {
+                    throw new Error(isLocalFile 
+                        ? "無法載入歌詞。在靜態 file:// 預覽模式下，瀏覽器安全限制可能會阻止載入。請啟動 FastAPI 伺服器並瀏覽 http://127.0.0.1:8000 存取。" 
+                        : "找不到該歌曲的歌詞資料。請確認已執行爬取歌詞程式。");
+                }
+
+                lyrics.forEach(line => {
+                    const lineEl = document.createElement('div');
+                    lineEl.className = 'lyric-line';
+
+                    const jaEl = document.createElement('div');
+                    jaEl.className = 'lyric-ja';
+                    jaEl.innerHTML = line.ja_html;
+
+                    const zhEl = document.createElement('div');
+                    zhEl.className = 'lyric-zh';
+                    zhEl.textContent = line.zh_text || '';
+
+                    lineEl.appendChild(jaEl);
+                    if (line.zh_text) {
+                        lineEl.appendChild(zhEl);
+                    }
+                    containerEl.appendChild(lineEl);
+                });
+
+                loadingEl.style.display = 'none';
+                containerEl.style.display = 'flex';
+
+            } catch (err) {
+                console.error(err);
+                loadingEl.style.display = 'none';
+                document.getElementById('modal-error-message').textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function closeLyricsModal() {
+            const modal = document.getElementById('lyrics-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        window.openLyricsModal = openLyricsModal;
+        window.closeLyricsModal = closeLyricsModal;
+
+        // Close modal when clicking outside content
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('lyrics-modal');
+            if (e.target === modal) {
+                closeLyricsModal();
+            }
+        });
+
+        // Sakura Falling Animation logic
+        function initSakura() {
+            const canvas = document.getElementById('sakura-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+            
+            window.addEventListener('resize', () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+            
+            const petalCount = 35;
+            const petals = [];
+            
+            class Petal {
+                constructor() {
+                    this.x = Math.random() * w;
+                    this.y = Math.random() * h - h;
+                    this.r = Math.random() * 6 + 4; // size
+                    this.d = Math.random() * petalCount; // density / rotation offset
+                    this.velX = Math.random() * 2 - 0.5; // X drift speed
+                    this.velY = Math.random() * 1.5 + 1; // Y fall speed
+                    this.flip = Math.random();
+                    this.flipSpeed = Math.random() * 0.03 + 0.01;
+                }
+                
+                draw() {
+                    if (this.y > h || this.x > w || this.x < -10) {
+                        this.x = Math.random() * w;
+                        this.y = -20;
+                        this.velX = Math.random() * 2 - 0.5;
+                        this.velY = Math.random() * 1.5 + 1;
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.d * Math.PI / 180);
+                    ctx.scale(this.flip, 1);
+                    
+                    // Sakura pink colors
+                    const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, this.r);
+                    grad.addColorStop(0, '#ffb7d5');
+                    grad.addColorStop(1, '#ff8da1');
+                    ctx.fillStyle = grad;
+                    
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-this.r, -this.r, -this.r * 1.5, this.r / 2, 0, this.r * 1.5);
+                    ctx.bezierCurveTo(this.r * 1.5, this.r / 2, this.r, -this.r, 0, 0);
+                    
+                    ctx.fill();
+                    ctx.restore();
+                }
+                
+                update() {
+                    this.x += this.velX + Math.sin(this.d * 0.01) * 0.5;
+                    this.y += this.velY;
+                    this.d += 0.5;
+                    this.flip += this.flipSpeed;
+                    if (this.flip > 1 || this.flip < -1) {
+                        this.flipSpeed = -this.flipSpeed;
+                    }
+                }
+            }
+            
+            for (let i = 0; i < petalCount; i++) {
+                petals.push(new Petal());
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                petals.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        // Chatbot Panel logic
+        const sidebar = document.getElementById('chatbot-sidebar');
+        const toggleKeyBtn = document.getElementById('btn-toggle-key');
+        const closeChatBtn = document.getElementById('btn-chat-close');
+        const floatToggleBtn = document.getElementById('chatbot-toggle-float');
+        const apiKeyPanel = document.getElementById('api-key-panel');
+        const apiKeyInput = document.getElementById('chat-api-key');
+        const saveKeyBtn = document.getElementById('btn-save-key');
+        const chatHistory = document.getElementById('chat-history');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('btn-chat-send');
+
+        let chatHistoryData = []; // format: {role: "user"|"model", text: "..."}
+
+        // Initialize API Key and Chat
+        function initChat() {
+            // Restore API key
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) {
+                apiKeyInput.value = savedKey;
+                toggleKeyBtn.classList.add('active');
+            }
+
+            // Set welcome msg time
+            const now = new Date();
+            document.getElementById('welcome-msg-time').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            // Toggle api key panel
+            toggleKeyBtn.addEventListener('click', () => {
+                apiKeyPanel.classList.toggle('show');
+            });
+
+            // Save api key
+            saveKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key', key);
+                    toggleKeyBtn.classList.add('active');
+                    alert('Gemini API Key 儲存成功！');
+                } else {
+                    localStorage.removeItem('gemini_api_key');
+                    toggleKeyBtn.classList.remove('active');
+                    alert('Gemini API Key 已清除。將使用後端環境變數。');
+                }
+                apiKeyPanel.classList.remove('show');
+            });
+
+            // Collapsing / Expanding Sidebar
+            closeChatBtn.addEventListener('click', () => {
+                sidebar.classList.add('collapsed');
+                floatToggleBtn.style.display = 'flex';
+            });
+
+            floatToggleBtn.addEventListener('click', () => {
+                sidebar.classList.remove('collapsed');
+                floatToggleBtn.style.display = 'none';
+            });
+
+            // Send message events
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            chatSendBtn.addEventListener('click', sendMessage);
+        }
+
+        // Send suggestions
+        window.sendSuggestion = function(text) {
+            chatInput.value = text;
+            sendMessage();
+        };
+
+        // Render message in chat UI
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${role}`;
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'msg-bubble';
+            
+            // Basic markdown-to-html conversion for clean list display
+            bubbleDiv.innerHTML = formatMarkdown(text);
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'msg-time';
+            const now = new Date();
+            timeDiv.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            msgDiv.appendChild(bubbleDiv);
+            msgDiv.appendChild(timeDiv);
+            chatHistory.appendChild(msgDiv);
+
+            // Auto scroll to bottom
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // Basic helper to convert markdown lists & bold text to HTML
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+                
+            // Convert list items
+            const lines = html.split('\n');
+            let inList = false;
+            let formattedLines = [];
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    if (!inList) {
+                        formattedLines.push('<ul>');
+                        inList = true;
+                    }
+                    formattedLines.push(`<li>${trimmed.substring(2)}</li>`);
+                } else if (/^\d+\.\s/.test(trimmed)) {
+                    if (!inList) {
+                        formattedLines.push('<ol>');
+                        inList = true;
+                    }
+                    const numMatch = trimmed.match(/^\d+\.\s/)[0];
+                    formattedLines.push(`<li>${trimmed.substring(numMatch.length)}</li>`);
+                } else {
+                    if (inList) {
+                        formattedLines.push(formattedLines[formattedLines.length - 1].startsWith('<li>') ? '</ul>' : '</ol>');
+                        inList = false;
+                    }
+                    formattedLines.push(line ? `<p>${line}</p>` : '<br>');
+                }
+            });
+            
+            if (inList) {
+                formattedLines.push('</ul>');
+            }
+            
+            return formattedLines.join('');
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Display user message
+            appendMessage('user', text);
+            chatInput.value = '';
+
+            // Loading bubble
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'chat-msg model';
+            loadingMsg.id = 'chat-loading-bubble';
+            loadingMsg.innerHTML = `
+                <div class="msg-bubble">
+                    <div style="display: flex; gap: 4px; align-items: center; padding: 4px 8px;">
+                        <span style="animation: bounce 1.4s infinite ease-in-out; width:6px; height:6px; background:#fff; border-radius:50%"></span>
+                        <span style="animation: bounce 1.4s infinite ease-in-out 0.2s; width:6px; height:6px; background:#fff; border-radius:50%"></span>
+                        <span style="animation: bounce 1.4s infinite ease-in-out 0.4s; width:6px; height:6px; background:#fff; border-radius:50%"></span>
+                    </div>
+                </div>
+            `;
+            chatHistory.appendChild(loadingMsg);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            // Add CSS bounce animation if not present
+            if (!document.getElementById('bounce-anim-style')) {
+                const style = document.createElement('style');
+                style.id = 'bounce-anim-style';
+                style.textContent = `
+                    @keyframes bounce {
+                        0%, 80%, 100% { transform: scale(0); }
+                        40% { transform: scale(1.0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            const apiKey = localStorage.getItem('gemini_api_key') || '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Gemini-API-Key': apiKey
+                    },
+                    body: JSON.stringify({
+                        message: text,
+                        history: chatHistoryData
+                    })
+                });
+
+                // Remove loading bubble
+                const loadingBubble = document.getElementById('chat-loading-bubble');
+                if (loadingBubble) loadingBubble.remove();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    appendMessage('model', data.response);
+                    
+                    // Update conversation history data
+                    chatHistoryData.push({ role: 'user', text: text });
+                    chatHistoryData.push({ role: 'model', text: data.response });
+                } else {
+                    const err = await response.json();
+                    appendMessage('model', `❌ 錯誤：${err.error || '無法取得 AI 回覆。'}`);
+                }
+            } catch (e) {
+                const loadingBubble = document.getElementById('chat-loading-bubble');
+                if (loadingBubble) loadingBubble.remove();
+                appendMessage('model', '❌ 網路連線失敗，請確認 FastAPI 伺服器正在運行。');
+            }
+        }
+
+        // Initial Render
+        initApp();
+    </script>
+</body>
+</html>
