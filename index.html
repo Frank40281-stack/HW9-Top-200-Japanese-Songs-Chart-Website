@@ -1079,7 +1079,7 @@
                     </div>
                     <h1>日語熱門歌曲排行榜</h1>
                     <p class="subtitle">MaruMaru-X Most Liked Japanese Songs Top 200</p>
-                    <p class="last-update" id="update-time">資料更新時間: 2026-06-30 17:47:56</p>
+                    <p class="last-update" id="update-time">資料更新時間: 2026-06-30</p>
                 </header>
 
                 <!-- Stats Grid -->
@@ -1301,7 +1301,7 @@
             if (!isLocalServer) {
                 console.log("Running in static mode (GitHub Pages or local file).");
                 songs = staticSongs;
-                document.getElementById('update-time').textContent = "資料更新時間: 2026-06-30 17:47:56 (靜態網頁模式)";
+                document.getElementById('update-time').textContent = "資料更新時間: 2026-06-30 (靜態網頁模式)";
                 if (refreshBtn) {
                     refreshBtn.title = "靜態模式下不可直接重新爬取，請在本地執行 python scraper.py 更新";
                     refreshBtn.style.opacity = "0.5";
