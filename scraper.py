@@ -1668,22 +1668,29 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
             try {
                 let lyrics = null;
-                if (isLocalFile) {
+                // Primary: Try fetching the static JSON file directly (essential for GitHub Pages)
+                try {
+                    const res = await fetch(`lyrics/${rank}.json`);
+                    if (res.ok) {
+                        lyrics = await res.json();
+                    }
+                } catch (e) {
+                    console.warn("Static lyrics fetch failed, trying API/Local fallbacks.");
+                }
+
+                // Fallback 1: Try FastAPI /api/lyrics/{rank}
+                if (!lyrics) {
                     try {
-                        const res = await fetch(`lyrics/${rank}.json`);
+                        const res = await fetch(`/api/lyrics/${rank}`);
                         if (res.ok) {
                             lyrics = await res.json();
                         }
                     } catch (e) {
-                        console.warn("Relative fetch failed, attempting fallback.");
-                    }
-                } else {
-                    const res = await fetch(`/api/lyrics/${rank}`);
-                    if (res.ok) {
-                        lyrics = await res.json();
+                        console.warn("FastAPI local endpoint not available.");
                     }
                 }
 
+                // Fallback 2: Try absolute localhost FastAPI endpoint if previewing from file://
                 if (!lyrics && isLocalFile) {
                     try {
                         const res = await fetch(`http://127.0.0.1:8000/api/lyrics/${rank}`);
@@ -1691,7 +1698,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             lyrics = await res.json();
                         }
                     } catch (e) {
-                        console.error("FastAPI fallback fetch failed:", e);
+                        console.error("FastAPI localhost fallback failed:", e);
                     }
                 }
 
@@ -2015,39 +2022,86 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
 
             const apiKey = localStorage.getItem('gemini_api_key') || '';
+            if (!apiKey) {
+                const loadingBubble = document.getElementById('chat-loading-bubble');
+                if (loadingBubble) loadingBubble.remove();
+                appendMessage('model', '❌ 尚未設定 API Key。請點選聊天室右上角金鑰按鈕，輸入您的 Gemini API Key 即可開始對談。');
+                return;
+            }
+
+            let catalogText = "以下是本站的最受歡迎日文歌排行前 150 名的資料資料 (包含 排名, 歌名, 歌手, 愛心數量, 播放次數, 時長, 發佈日期, 標籤):\n";
+            try {
+                songs.slice(0, 150).forEach(song => {
+                    catalogText += `#${song.排名}: ${song.歌名} - ${song.歌手} (愛心: ${song.愛心數量}, 播放: ${song.播放次數}, 時長: ${song.時長}, 日期: ${song.發佈日期 || '未知'}, 標籤: ${song.標籤 || ''})\n`;
+                });
+            } catch (err) {
+                catalogText += "（無法載入歌曲資料庫，請以您的歌曲知識回答。）";
+            }
+
+            const systemInstruction = 
+                "你是 'MaruMaru-X 日語熱門歌曲排行榜 (Top 200)' 網站的 AI 助手。\n" +
+                "你擁有網站上熱門日文歌曲的完整數據庫（前150首）。請善加利用這些資訊回答使用者關於歌曲推薦、熱門歌手、播放量、發佈日期、時長、標籤篩選等問題。\n" +
+                "如果使用者問及排行榜外的歌，請委婉告知你只專注於 Top 200 排行榜，但能推薦排行榜內相似風格的歌。\n" +
+                "請一律使用『繁體中文』回答，語氣要親切、專業、客氣。回答內容請用 Markdown 格式進行條列與粗體標示，以便閱讀。\n" +
+                catalogText + "\n";
+
+            const contents = [];
+            chatHistoryData.forEach(item => {
+                contents.push({
+                    role: item.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: item.text }]
+                });
+            });
+            contents.push({
+                role: 'user',
+                parts: [{ text: text }]
+            });
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const reqBody = {
+                contents: contents,
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                },
+                generationConfig: {
+                    temperature: 0.7,
+                    topP: 0.95,
+                    maxOutputTokens: 1024
+                }
+            };
 
             try {
-                const response = await fetch('/api/chat', {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Gemini-API-Key': apiKey
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: text,
-                        history: chatHistoryData
-                    })
+                    body: JSON.stringify(reqBody)
                 });
 
-                // Remove loading bubble
                 const loadingBubble = document.getElementById('chat-loading-bubble');
                 if (loadingBubble) loadingBubble.remove();
 
                 if (response.ok) {
                     const data = await response.json();
-                    appendMessage('model', data.response);
-                    
-                    // Update conversation history data
-                    chatHistoryData.push({ role: 'user', text: text });
-                    chatHistoryData.push({ role: 'model', text: data.response });
+                    const candidates = data.candidates || [];
+                    if (candidates.length > 0 && candidates[0].content && candidates[0].content.parts && candidates[0].content.parts[0].text) {
+                        const replyText = candidates[0].content.parts[0].text;
+                        appendMessage('model', replyText);
+                        chatHistoryData.push({ role: 'user', text: text });
+                        chatHistoryData.push({ role: 'model', text: replyText });
+                    } else {
+                        appendMessage('model', '❌ 錯誤：Gemini API 回傳格式不符合預期。');
+                    }
                 } else {
-                    const err = await response.json();
-                    appendMessage('model', `❌ 錯誤：${err.error || '無法取得 AI 回覆。'}`);
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = (errData.error && errData.error.message) || '無法取得 AI 回覆。';
+                    appendMessage('model', `❌ API 錯誤：${errMsg}`);
                 }
             } catch (e) {
                 const loadingBubble = document.getElementById('chat-loading-bubble');
                 if (loadingBubble) loadingBubble.remove();
-                appendMessage('model', '❌ 網路連線失敗，請確認 FastAPI 伺服器正在運行。');
+                appendMessage('model', '❌ 網路連線失敗，請檢查網路。');
             }
         }
 

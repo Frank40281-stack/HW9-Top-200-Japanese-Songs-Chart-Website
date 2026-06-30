@@ -15,23 +15,23 @@ pip install -r requirements.txt
 python -m playwright install chromium
 ```
 
-### 2. 啟動 FastAPI 服務與動態展示網頁
-此專案支援 FastAPI 後端伺服器！執行以下指令啟動：
+### 2. 本地預覽網頁
+本專案為純靜態前端應用，您無須啟動任何後端 Python 伺服器，直接在瀏覽器按兩下開啟專案根目錄的 **`index.html`** 即可瀏覽！
+
+### 3. GitHub Pages 線上展示（推薦）
+本專案已成功部署至 GitHub Pages，您可以直接點擊連結瀏覽線上展示版：
+👉 **[MaruMaru-X Top 200 線上儀表板](https://frank40281-stack.github.io/HW9-Top-200-Japanese-Songs-Chart-Website/)**
+
+*(在線上展示版中，您可以使用側邊欄的 AI 助理，輸入您的 Gemini API Key 來直接查詢、分析 Top 200 歌曲庫，且點擊歌曲即可流暢載入 Furigana 注音歌詞！)*
+
+### 4. 執行爬蟲程式更新資料
+如果您想在本地重新抓取排行榜或更新歌詞資料：
 ```bash
-python -m uvicorn main:app --reload
-```
-啟動後，即可在本地查看動態更新的互動式儀表板。
-
-### 3. Streamlit Community Cloud 線上展示（推薦）
-本專案已成功部署至 Streamlit Cloud，您可以直接瀏覽線上展示版：
-👉 **[MaruMaru-X Top 200 線上儀表板](https://hw9-top-200-japanese-songs-chart-website-qvzkxh4jjz7a7pdwtfxqo.streamlit.app/)**
-
-在線上展示版中，您可以使用側邊欄的 AI 助理，輸入您的 Gemini API Key 來直接查詢、分析 Top 200 歌曲庫！
-
-### 4. 獨立執行爬蟲程式
-如果您只想在本地靜態抓取並更新資料：
-```bash
+# 爬取排行榜歌曲資料 (輸出為 top200_songs.csv 及 index.html)
 python scraper.py
+
+# 爬取全數歌曲的日文平假名/中文翻譯歌詞 (儲存於 lyrics/ 資料夾下)
+python scrape_lyrics.py
 ```
 
 ## 排行榜數據表 (Top 200)
