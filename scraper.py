@@ -1314,18 +1314,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         // Check if running from web server or local filesystem
         const isLocalFile = window.location.protocol === 'file:';
+        const isLocalServer = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
 
         async function initApp() {
             const refreshBtn = document.getElementById('btn-refresh');
-            if (isLocalFile) {
-                console.log("Running in static file preview mode.");
+            if (!isLocalServer) {
+                console.log("Running in static mode (GitHub Pages or local file).");
                 songs = staticSongs;
-                document.getElementById('update-time').textContent = "資料更新時間: [DATE_PLACEHOLDER] (靜態檔案預覽)";
+                document.getElementById('update-time').textContent = "資料更新時間: [DATE_PLACEHOLDER] (靜態網頁模式)";
                 if (refreshBtn) {
-                    refreshBtn.title = "靜態預覽模式下不可用，請啟動 FastAPI 伺服器";
+                    refreshBtn.title = "靜態模式下不可直接重新爬取，請在本地執行 python scraper.py 更新";
                     refreshBtn.style.opacity = "0.5";
                     refreshBtn.addEventListener('click', () => {
-                        alert("當前為靜態預覽模式。要重新爬取資料，請啟動 FastAPI 伺服器並透過 http://localhost:8000 存取！");
+                        alert("當前為 GitHub Pages 靜態模式。如需更新資料，請在本地執行 python scraper.py 重新爬取並推送到 GitHub！");
                     });
                 }
                 calculateAndDisplayStats(songs);
