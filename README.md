@@ -16,14 +16,20 @@ python -m playwright install chromium
 ```
 
 ### 2. 啟動 FastAPI 服務與動態展示網頁
-此專案現已支援 FastAPI 後端伺服器！執行以下指令啟動：
+此專案支援 FastAPI 後端伺服器！執行以下指令啟動：
 ```bash
 python -m uvicorn main:app --reload
 ```
-啟動後，請瀏覽 [http://127.0.0.1:8000](http://127.0.0.1:8000) 即可查看完全動態、即時更新的互動式儀表板。並可以直接在網頁上點選 **「重新爬取資料」** 按鈕，這將會在後端觸發非同步的背景爬蟲工作，更新 CSV 及網頁數據！
+啟動後，即可在本地查看動態更新的互動式儀表板。
 
-### 3. 獨立執行爬蟲程式
-如果您只想靜態抓取並更新資料：
+### 3. Streamlit Community Cloud 線上展示（推薦）
+本專案已成功部署至 Streamlit Cloud，您可以直接瀏覽線上展示版：
+👉 **[MaruMaru-X Top 200 線上儀表板](https://hw9-top-200-japanese-songs-chart-website-qvzkxh4jjz7a7pdwtfxqo.streamlit.app/)**
+
+在線上展示版中，您可以使用側邊欄的 AI 助理，輸入您的 Gemini API Key 來直接查詢、分析 Top 200 歌曲庫！
+
+### 4. 獨立執行爬蟲程式
+如果您只想在本地靜態抓取並更新資料：
 ```bash
 python scraper.py
 ```
