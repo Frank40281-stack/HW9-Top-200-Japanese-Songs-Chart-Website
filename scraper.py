@@ -1224,9 +1224,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div class="chat-messages" id="chat-history">
                 <div class="chat-msg model">
                     <div class="msg-bubble">
-                        哈囉！我是您的 AI 歌曲小幫手。我可以為您推薦 Top 200 的日文歌曲、分析歌手或提供歌曲類型建議。
+                        哈囉！我是您的 AI 歌曲小幫手 🎵。
                         <br><br>
-                        請在上方設定您的 <strong>Gemini API Key</strong> 即可開始與我對談喔！
+                        目前已為您啟用<strong>「本地離線問答模式」</strong>（無需 API 金鑰）！您可以直接在下方輸入框詢問關於本站 <strong>Top 200 排行榜歌曲</strong> 的任何問題，或點選下方推薦問題。
+                        <br><br>
+                        <em>(若您想開啟完整的進階雲端對話功能，也可點選右上角 🔑 按鈕輸入您的 Gemini API Key)</em>
                     </div>
                     <div class="msg-time" id="welcome-msg-time">--:--</div>
                 </div>
@@ -1671,7 +1673,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         // Modal functions
         async function openLyricsModal(rank) {
-            const song = songs.find(s => s.排名 === rank);
+            const song = songs.find(s => parseInt(s.排名) === parseInt(rank));
             if (!song) return;
 
             const modal = document.getElementById('lyrics-modal');
@@ -2000,7 +2002,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 .replace(/>/g, "&gt;")
                 .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
                 .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code>$1</code>');
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\[(.*?)\]\((javascript:openLyricsModal\(\d+\))\)/g, '<a href="$2">$1</a>')
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
                 
             // Convert list items
             const lines = html.split('\\n');
@@ -2036,6 +2040,200 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
             
             return formattedLines.join('');
+        }
+
+        // Local Rule-Based Q&A Chatbot (Offline backup mode)
+        function getLocalAIResponse(query) {
+            const q = query.toLowerCase().trim();
+            
+            if (q.includes("說明") || q.includes("幫助") || q.includes("你是誰") || (q.includes("介紹") && q.length < 5) || q === "hi" || q === "hello" || q === "你好" || q === "welcome") {
+                return `你好！我是 **MaruMaru-X 本地 AI 助手** 🎵。當前為 **本地離線問答模式** (不需要 API 金鑰)。\\n\\n你可以直接問我有關本站 **Top 200 排行榜歌曲** 的問題，我會為你做即時數據檢索！\\n\\n**💡 試試看這樣問我：**\\n- **推薦歌手歌曲**：『推薦 3 首米津玄師的歌曲』或『YOASOBI 有哪些歌？』\\n- **標籤篩選**：『推薦動漫歌』、『有哪些 #ANM 的熱門歌？』或『有搖滾歌嗎？』\\n- **數據排行**：『播放次數最多的是哪首？』、『愛心最多的是前三名？』或『幫我推薦播放次數大於 100K 且愛心多的歌曲』\\n- **歌曲詳細資訊**：『介紹 Lemon 這首歌』或『#1 歌曲是哪首？』\\n- **隨機推薦**：『隨機推薦一首歌』或『我不知道聽什麼，幫我選歌』\\n\\n*如果您想進行任意話題的自由對談，可以點擊對話框右上角的 🔑 金鑰按鈕輸入 Gemini API Key 切換為雲端 AI 模式！*`;
+            }
+
+            function formatSongList(filteredSongs, limit = 10) {
+                if (filteredSongs.length === 0) return '';
+                const showSongs = filteredSongs.slice(0, limit);
+                let response = `為您找到以下相關熱門歌曲 (共 ${filteredSongs.length} 首)：\\n\\n`;
+                showSongs.forEach(song => {
+                    response += `**#${song.排名}** [${song.歌名}](${song.歌曲連結 || '#'}) - **${song.歌手}**\\n`;
+                    response += `- 💖 愛心數: **${song.愛心數量}** | 🎧 播放量: **${song.播放次數}** | ⏱️ 時長: **${song.時長}**\\n`;
+                    if (song.標籤) {
+                        response += `- 🏷️ 標籤: ${song.標籤.split(',').map(t => t.trim()).join(' ')}\\n`;
+                    }
+                    response += `  👉 [點此開啟歌詞與封面](javascript:openLyricsModal(${song.排名}))\\n\\n`;
+                });
+                if (filteredSongs.length > limit) {
+                    response += `*...還有額外的 ${filteredSongs.length - limit} 首歌曲，您可以使用頁面頂部的搜尋欄進行篩選！*\\n`;
+                }
+                return response;
+            }
+
+            let rankMatch = q.match(/#(\\d+)/) || q.match(/第\\s*(\\d+)\\s*名/);
+            let rankNum = null;
+            if (rankMatch) {
+                rankNum = parseInt(rankMatch[1]);
+            } else if (q.includes("第一名") || q.includes("排行第一") || q.includes("冠軍")) {
+                rankNum = 1;
+            } else if (q.includes("第二名")) {
+                rankNum = 2;
+            } else if (q.includes("第三名")) {
+                rankNum = 3;
+            }
+
+            if (rankNum && rankNum >= 1 && rankNum <= 200) {
+                const song = songs.find(s => parseInt(s.排名) === rankNum);
+                if (song) {
+                    return `🏆 **排行榜第 ${rankNum} 名的歌曲資訊：**\\n\\n**【${song.歌名}】**\\n- 🎤 **歌手**：${song.歌手}\\n- 💖 **愛心數量**：**${song.愛心數量}**\\n- 🎧 **播放次數**：**${song.播放次數}**\\n- ⏱️ **時長**：**${song.時長}**\\n- 📅 **發佈日期**：**${song.發佈日期 || '未知'}**\\n- 🏷️ **歌曲標籤**：${song.標籤 ? song.標籤.split(',').map(t => t.trim()).join(' ') : '無'}\\n- 🔗 **連結**：[前往 MaruMaru 線上觀看/聽歌](${song.歌曲連結})\\n- 🎵 **歌詞**：[點擊此處載入注音歌詞](javascript:openLyricsModal(${song.排名}))`;
+                }
+            }
+
+            let matchedSong = null;
+            for (let song of songs) {
+                if (song.歌名 && q.includes(song.歌名.toLowerCase())) {
+                    matchedSong = song;
+                    break;
+                }
+            }
+
+            if (matchedSong) {
+                return `🎵 **找到歌曲【${matchedSong.歌名}】的詳細資訊：**\\n\\n- 🏆 **排行榜排名**：第 **${matchedSong.排名}** 名\\n- 🎤 **歌手/團體**：**${matchedSong.歌手}**\\n- 💖 **愛心數**：**${matchedSong.愛心數量}**\\n- 🎧 **播放次數**：**${matchedSong.播放次數}**\\n- ⏱️ **時長**：**${matchedSong.時長}**\\n- 📅 **發佈日期**：**${matchedSong.發佈日期 || '未知'}**\\n- 🏷️ **分類標籤**：${matchedSong.標籤 ? matchedSong.標籤.split(',').map(t => t.trim()).join(' ') : '無'}\\n- 🔗 **播放連結**：[在 MaruMaru 線上學習/唱歌](${matchedSong.歌曲連結})\\n- 💬 **互動功能**：[點擊此處打開歌詞面板](javascript:openLyricsModal(${matchedSong.排名}))`;
+            }
+
+            let matchedSinger = null;
+            const singers = [...new Set(songs.map(s => s.歌手))];
+            for (let singer of singers) {
+                if (singer && q.includes(singer.toLowerCase())) {
+                    matchedSinger = singer;
+                    break;
+                }
+            }
+
+            if (matchedSinger) {
+                const singerSongs = songs.filter(s => s.歌手.toLowerCase().includes(matchedSinger.toLowerCase()));
+                let limit = 10;
+                const numMatch = q.match(/(\\d+)\\s*首/);
+                if (numMatch) limit = parseInt(numMatch[1]);
+                
+                let reply = `🎤 **本站 Top 200 中包含「${matchedSinger}」的歌曲：**\\n\\n`;
+                reply += formatSongList(singerSongs, limit);
+                return reply;
+            }
+
+            let tagFilter = null;
+            if (q.includes("動漫") || q.includes("anm") || q.includes("acg") || q.includes("cartoon")) {
+                tagFilter = "ANM";
+            } else if (q.includes("搖滾") || q.includes("rck") || q.includes("rock")) {
+                tagFilter = "RCK";
+            } else if (q.includes("流行") || q.includes("pop") || q.includes("jpop") || q.includes("j-pop")) {
+                tagFilter = "POP";
+            } else if (q.includes("慢歌") || q.includes("抒情") || q.includes("slw") || q.includes("slow")) {
+                tagFilter = "SLW";
+            } else if (q.includes("快歌") || q.includes("fst") || q.includes("fast") || q.includes("嗨歌")) {
+                tagFilter = "FST";
+            } else if (q.includes("抖音") || q.includes("tik") || q.includes("tok") || q.includes("網路")) {
+                tagFilter = "NET";
+            } else if (q.includes("經典") || q.includes("cld") || q.includes("classic")) {
+                tagFilter = "CLD";
+            } else if (q.includes("影視") || q.includes("ost") || q.includes("主題曲") || q.includes("劇")) {
+                tagFilter = "OST";
+            }
+
+            if (tagFilter) {
+                const taggedSongs = songs.filter(s => s.標籤 && s.標籤.toUpperCase().includes(tagFilter));
+                let limit = 5;
+                const numMatch = q.match(/(\\d+)\\s*首/);
+                if (numMatch) limit = parseInt(numMatch[1]);
+                
+                let genreName = tagFilter === "ANM" ? "動漫熱門歌" :
+                                tagFilter === "RCK" ? "搖滾歌" :
+                                tagFilter === "POP" ? "流行歌" :
+                                tagFilter === "SLW" ? "抒情慢歌" :
+                                tagFilter === "FST" ? "快歌/嗨歌" :
+                                tagFilter === "NET" ? "網路/抖音流行歌" :
+                                tagFilter === "CLD" ? "經典歌曲" : "影視主題曲";
+                                
+                let reply = `🏷️ **為您推薦分類為「${genreName} (#${tagFilter})」的熱門歌：**\\n\\n`;
+                reply += formatSongList(taggedSongs, limit);
+                return reply;
+            }
+
+            if (q.includes("播放次數") || q.includes("播放量") || q.includes("點閱")) {
+                let thresh = 0;
+                if (q.includes("100k") || q.includes("10萬") || q.includes("100,000") || q.includes("100000")) {
+                    thresh = 100000;
+                } else if (q.includes("50k") || q.includes("5萬") || q.includes("50000")) {
+                    thresh = 50000;
+                } else if (q.includes("500k") || q.includes("50萬") || q.includes("500000")) {
+                    thresh = 500000;
+                } else if (q.includes("1m") || q.includes("100萬") || q.includes("1000000")) {
+                    thresh = 1000000;
+                }
+                
+                function parsePlays(playsStr) {
+                    if (!playsStr) return 0;
+                    let clean = playsStr.replace(/,/g, '').trim();
+                    if (clean.includes('萬')) {
+                        return parseFloat(clean.replace('萬', '')) * 10000;
+                    }
+                    return parseInt(clean) || 0;
+                }
+                
+                if (thresh > 0) {
+                    const filtered = songs.filter(s => parsePlays(s.播放次數) >= thresh);
+                    filtered.sort((a, b) => parsePlays(b.播放次數) - parsePlays(a.播放次數));
+                    
+                    let reply = `🎧 **播放次數大於 ${thresh.toLocaleString()} 次的熱門歌曲（依播放量排序）：**\\n\\n`;
+                    reply += formatSongList(filtered, 5);
+                    return reply;
+                } else {
+                    const sorted = [...songs].sort((a, b) => parsePlays(b.播放次數) - parsePlays(a.播放次數));
+                    let reply = `🎧 **本站播放次數最高的前 5 首歌曲：**\\n\\n`;
+                    reply += formatSongList(sorted, 5);
+                    return reply;
+                }
+            }
+
+            if (q.includes("愛心") || q.includes("喜歡") || q.includes("like")) {
+                function parseLikes(likesStr) {
+                    if (!likesStr) return 0;
+                    let clean = likesStr.replace(/,/g, '').trim();
+                    if (clean.includes('萬')) {
+                        return parseFloat(clean.replace('萬', '')) * 10000;
+                    }
+                    return parseInt(clean) || 0;
+                }
+                const sorted = [...songs].sort((a, b) => parseLikes(b.愛心數量) - parseLikes(a.愛心數量));
+                let reply = `💖 **本站愛心按讚數最高的前 5 首歌曲：**\\n\\n`;
+                reply += formatSongList(sorted, 5);
+                return reply;
+            }
+
+            if (q.includes("隨機") || q.includes("挑一首") || q.includes("選歌") || q.includes("聽什麼") || q.includes("推薦一首")) {
+                const randIndex = Math.floor(Math.random() * songs.length);
+                const song = songs[randIndex];
+                return `🎲 **隨機為您挑選一首熱門好歌：**\\n\\n**【${song.歌名}】** (排名 #${song.排名})\\n- 🎤 **歌手**：${song.歌手}\\n- 💖 **愛心數**：**${song.愛心數量}** | 🎧 **播放次數**：**${song.播放次數}**\\n- ⏱️ **時長**：**${song.時長}**\\n- 🏷️ **標籤**：${song.標籤 ? song.標籤.split(',').map(t => t.trim()).join(' ') : '無'}\\n- 🔗 **點歌聽歌**：[直接去 MaruMaru 聽歌](${song.歌曲連結})\\n- 💬 **歌詞**：[點擊此處打開注音歌詞](javascript:openLyricsModal(${song.排名}))`;
+            }
+
+            const searchWords = q.split(/\\s+/).filter(w => w.length > 1);
+            let searchResults = [];
+            for (let word of searchWords) {
+                if (["推薦", "有哪些", "歌曲", "熱門", "播放", "歌詞", "排行"].includes(word)) continue;
+                const matches = songs.filter(s => 
+                    (s.歌名 && s.歌名.toLowerCase().includes(word)) || 
+                    (s.歌手 && s.歌手.toLowerCase().includes(word)) ||
+                    (s.標籤 && s.標籤.toLowerCase().includes(word))
+                );
+                searchResults.push(...matches);
+            }
+            searchResults = [...new Set(searchResults)];
+            
+            if (searchResults.length > 0) {
+                let reply = `🔍 **為您模糊搜尋到以下相關歌曲：**\\n\\n`;
+                reply += formatSongList(searchResults, 5);
+                return reply;
+            }
+
+            return `💡 **無法在排行榜資料庫中找到精確符合的結果。**\\n\\n您當前處於 **本地離線問答模式** (無需金鑰)。您可以試試看下列查詢方式：\\n- 輸入歌手名稱：『米津玄師』、『YOASOBI』\\n- 輸入歌曲名稱：『Lemon』、『Idol』\\n- 輸入分類標籤：『動漫歌』、『搖滾』\\n- 輸入排名數字：『#1』、『第 10 名』\\n- 輸入隨機推薦：『隨機推薦』\\n\\n*如果您需要與 AI 自由談話，請點擊聊天室右上角 🔑 金鑰按鈕輸入您的 Gemini API Key 啟用雲端 AI 模式。*`;
         }
 
         async function sendMessage() {
@@ -2076,10 +2274,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
 
             const apiKey = localStorage.getItem('gemini_api_key') || '';
+            
+            // Check if API Key is set. If not, use local offline Q&A chatbot!
             if (!apiKey) {
-                const loadingBubble = document.getElementById('chat-loading-bubble');
-                if (loadingBubble) loadingBubble.remove();
-                appendMessage('model', '❌ 尚未設定 API Key。請點選聊天室右上角金鑰按鈕，輸入您的 Gemini API Key 即可開始對談。');
+                setTimeout(() => {
+                    const loadingBubble = document.getElementById('chat-loading-bubble');
+                    if (loadingBubble) loadingBubble.remove();
+                    
+                    const replyText = getLocalAIResponse(text);
+                    appendMessage('model', replyText);
+                    chatHistoryData.push({ role: 'user', text: text });
+                    chatHistoryData.push({ role: 'model', text: replyText });
+                }, 600);
                 return;
             }
 
