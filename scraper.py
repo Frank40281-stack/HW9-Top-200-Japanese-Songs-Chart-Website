@@ -1338,8 +1338,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 if (refreshBtn) {
                     refreshBtn.addEventListener('click', triggerScrapeAPI);
                 }
-                await fetchSongsFromAPI();
-                await fetchStatsFromAPI();
+                const success = await fetchSongsFromAPI();
+                if (!success) {
+                    console.warn("Failed to fetch from FastAPI backend. Falling back to static songs.");
+                    songs = staticSongs;
+                    document.getElementById('update-time').textContent = "資料更新時間: [DATE_PLACEHOLDER] (靜態網頁備用模式)";
+                    if (refreshBtn) {
+                        refreshBtn.title = "連接 API 失敗，已切換至靜態模式。請啟動 FastAPI 伺服器以進行動態操作";
+                        refreshBtn.style.opacity = "0.5";
+                        refreshBtn.removeEventListener('click', triggerScrapeAPI);
+                        refreshBtn.addEventListener('click', () => {
+                            alert("連接 API 失敗，當前已自動切換至備用靜態模式。如需動態功能（重新爬取等），請先啟動 FastAPI 伺服器！");
+                        });
+                    }
+                    calculateAndDisplayStats(songs);
+                    renderSongs();
+                } else {
+                    await fetchStatsFromAPI();
+                }
                 setupTagFilterDropdown();
             }
             // Initialize Sakura Animation
@@ -1355,11 +1371,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 if (response.ok) {
                     songs = await response.json();
                     renderSongs();
+                    return true;
                 } else {
                     console.error("Failed to fetch songs from API.");
+                    return false;
                 }
             } catch (e) {
                 console.error("Error fetching songs from API:", e);
+                return false;
             }
         }
 
@@ -1623,6 +1642,33 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             renderSongs();
         };
 
+        // Helper to load lyrics via JSONP (crucial for local file:// protocol)
+        function loadLyricsViaJSONP(rank) {
+            return new Promise((resolve, reject) => {
+                const oldScript = document.getElementById('lyric-jsonp-script');
+                if (oldScript) oldScript.remove();
+                
+                window.lyricData = null;
+                
+                const script = document.createElement('script');
+                script.id = 'lyric-jsonp-script';
+                script.src = `lyrics/${rank}.js`;
+                script.onload = () => {
+                    if (window.lyricData) {
+                        resolve(window.lyricData);
+                    } else {
+                        reject(new Error("No lyric data populated"));
+                    }
+                    script.remove();
+                };
+                script.onerror = () => {
+                    reject(new Error("Failed to load script"));
+                    script.remove();
+                };
+                document.body.appendChild(script);
+            });
+        }
+
         // Modal functions
         async function openLyricsModal(rank) {
             const song = songs.find(s => s.排名 === rank);
@@ -1673,10 +1719,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 try {
                     const res = await fetch(`lyrics/${rank}.json`);
                     if (res.ok) {
-                        lyrics = await res.json();
+                        lyrics = await res.ok ? await res.json() : null;
                     }
                 } catch (e) {
-                    console.warn("Static lyrics fetch failed, trying API/Local fallbacks.");
+                    console.warn("Static lyrics fetch failed, trying JSONP/API fallbacks.");
+                }
+
+                // Fallback JSONP: Try loading as a local JS script (essential for file:// protocol)
+                if (!lyrics) {
+                    try {
+                        lyrics = await loadLyricsViaJSONP(rank);
+                    } catch (e) {
+                        console.warn("JSONP lyrics load failed, trying API fallbacks.");
+                    }
                 }
 
                 // Fallback 1: Try FastAPI /api/lyrics/{rank}
@@ -1704,9 +1759,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
 
                 if (!lyrics || lyrics.length === 0) {
-                    throw new Error(isLocalFile 
-                        ? "無法載入歌詞。在靜態 file:// 預覽模式下，瀏覽器安全限制可能會阻止載入。請啟動 FastAPI 伺服器並瀏覽 http://127.0.0.1:8000 存取。" 
-                        : "找不到該歌曲的歌詞資料。請確認已執行爬取歌詞程式。");
+                    throw new Error("找不到該歌曲的歌詞資料。請確認已在本地執行過爬取歌詞程式（python scrape_lyrics.py）。");
                 }
 
                 lyrics.forEach(line => {
@@ -2030,21 +2083,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 return;
             }
 
-            let catalogText = "以下是本站的最受歡迎日文歌排行前 150 名的資料資料 (包含 排名, 歌名, 歌手, 愛心數量, 播放次數, 時長, 發佈日期, 標籤):\n";
+            let catalogText = "以下是本站的最受歡迎日文歌排行前 150 名的資料資料 (包含 排名, 歌名, 歌手, 愛心數量, 播放次數, 時長, 發佈日期, 標籤):\\n";
             try {
                 songs.slice(0, 150).forEach(song => {
-                    catalogText += `#${song.排名}: ${song.歌名} - ${song.歌手} (愛心: ${song.愛心數量}, 播放: ${song.播放次數}, 時長: ${song.時長}, 日期: ${song.發佈日期 || '未知'}, 標籤: ${song.標籤 || ''})\n`;
+                    catalogText += `#${song.排名}: ${song.歌名} - ${song.歌手} (愛心: ${song.愛心數量}, 播放: ${song.播放次數}, 時長: ${song.時長}, 日期: ${song.發佈日期 || '未知'}, 標籤: ${song.標籤 || ''})\\n`;
                 });
             } catch (err) {
                 catalogText += "（無法載入歌曲資料庫，請以您的歌曲知識回答。）";
             }
 
             const systemInstruction = 
-                "你是 'MaruMaru-X 日語熱門歌曲排行榜 (Top 200)' 網站的 AI 助手。\n" +
-                "你擁有網站上熱門日文歌曲的完整數據庫（前150首）。請善加利用這些資訊回答使用者關於歌曲推薦、熱門歌手、播放量、發佈日期、時長、標籤篩選等問題。\n" +
-                "如果使用者問及排行榜外的歌，請委婉告知你只專注於 Top 200 排行榜，但能推薦排行榜內相似風格的歌。\n" +
-                "請一律使用『繁體中文』回答，語氣要親切、專業、客氣。回答內容請用 Markdown 格式進行條列與粗體標示，以便閱讀。\n" +
-                catalogText + "\n";
+                "你是 'MaruMaru-X 日語熱門歌曲排行榜 (Top 200)' 網站的 AI 助手。\\n" +
+                "你擁有網站上熱門日文歌曲的完整數據庫（前150首）。請善加利用這些資訊回答使用者關於歌曲推薦、熱門歌手、播放量、發佈日期、時長、標籤篩選等問題。\\n" +
+                "如果使用者問及排行榜外的歌，請委婉告知你只專注於 Top 200 排行榜，但能推薦排行榜內相似風格的歌。\\n" +
+                "請一律使用『繁體中文』回答，語氣要親切、專業、客氣。回答內容請用 Markdown 格式進行條列與粗體標示，以便閱讀。\\n" +
+                catalogText + "\\n";
 
             const contents = [];
             chatHistoryData.forEach(item => {
@@ -2315,14 +2368,17 @@ def generate_readme(songs):
             f.write("### 1. 安裝環境需求\n")
             f.write("```bash\npip install -r requirements.txt\npython -m playwright install chromium\n```\n\n")
             
-            f.write("### 2. 啟動 FastAPI 服務與動態展示網頁\n")
-            f.write("此專案現已支援 FastAPI 後端伺服器！執行以下指令啟動：\n")
-            f.write("```bash\npython -m uvicorn main:app --reload\n```\n")
-            f.write("啟動後，請瀏覽 [http://127.0.0.1:8000](http://127.0.0.1:8000) 即可查看完全動態、即時更新的互動式儀表板。並可以直接在網頁上點選 **「重新爬取資料」** 按鈕，這將會在後端觸發非同步的背景爬蟲工作，更新 CSV 及網頁數據！\n\n")
+            f.write("### 2. 本地預覽網頁\n")
+            f.write("本專案為純靜態前端應用，您無須啟動任何後端 Python 伺服器，直接在瀏覽器按兩下開啟專案根目錄的 **`index.html`** 即可瀏覽！\n\n")
             
-            f.write("### 3. 獨立執行爬蟲程式\n")
-            f.write("如果您只想靜態抓取並更新資料：\n")
-            f.write("```bash\npython scraper.py\n```\n\n")
+            f.write("### 3. GitHub Pages 線上展示（推薦）\n")
+            f.write("本專案已成功部署至 GitHub Pages，您可以直接點擊連結瀏覽線上展示版：\n")
+            f.write("👉 **[MaruMaru-X Top 200 線上儀表板](https://frank40281-stack.github.io/HW9-Top-200-Japanese-Songs-Chart-Website/)**\n\n")
+            f.write("*(在線上展示版中，您可以使用側邊欄的 AI 助理，輸入您的 Gemini API Key 來直接查詢、分析 Top 200 歌曲庫，且點擊歌曲即可流暢載入 Furigana 注音歌詞！)*\n\n")
+            
+            f.write("### 4. 執行爬蟲程式更新資料\n")
+            f.write("如果您想在本地重新抓取排行榜或更新歌詞資料：\n")
+            f.write("```bash\n# 爬取排行榜歌曲資料 (輸出為 top200_songs.csv 及 index.html)\npython scraper.py\n\n# 爬取全數歌曲的日文平假名/中文翻譯歌詞 (儲存於 lyrics/ 資料夾下)\npython scrape_lyrics.py\n```\n\n")
             
             f.write("## 排行榜數據表 (Top 200)\n\n")
             # 寫入 markdown 表頭

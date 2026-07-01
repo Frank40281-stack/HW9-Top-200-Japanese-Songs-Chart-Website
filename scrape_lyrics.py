@@ -83,8 +83,15 @@ def scrape_single_song_lyrics(song, force=False):
     lyrics = parse_lyrics_from_url(url)
     
     if lyrics:
+        # Save JSON
         with open(out_path, "w", encoding="utf-8") as out:
             json.dump(lyrics, out, ensure_ascii=False, indent=2)
+            
+        # Save JS for local preview fallback (JSONP)
+        js_path = os.path.join(LYRICS_DIR, f"{rank}.js")
+        with open(js_path, "w", encoding="utf-8") as out:
+            out.write(f"window.lyricData = {json.dumps(lyrics, ensure_ascii=False)};")
+            
         print(f"[{rank}] 歌詞爬取成功，共 {len(lyrics)} 句。")
         return True
     else:
